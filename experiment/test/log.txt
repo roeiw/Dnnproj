@@ -1,0 +1,1 @@
+[Epoch 2]	Learning rate: 1.00e-4
