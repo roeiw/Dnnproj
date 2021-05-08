@@ -1,7 +1,7 @@
 import os
 import math
 from decimal import Decimal
-
+import matplotlib.pyplot as plt
 import utility
 
 import torch
@@ -44,6 +44,8 @@ class Trainer():
         timer_data, timer_model = utility.timer(), utility.timer()
         for batch, (lr, hr, _, idx_scale) in enumerate(self.loader_train):
             lr, hr = self.prepare([lr, hr])
+            print(type(lr))
+           # plt.imshow(lr.permute(1,2,0))
             timer_data.hold()
             timer_model.tic()
 

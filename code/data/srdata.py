@@ -1,9 +1,9 @@
 import os
-
+import imageio
 from data import common
-
 import numpy as np
 import scipy.misc as misc
+import PIL
 
 import torch
 import torch.utils.data as data
@@ -28,16 +28,20 @@ class SRData(data.Dataset):
         if args.ext == 'img' or benchmark:
             self.images_hr, self.images_lr = self._scan()
         elif args.ext.find('sep') >= 0:
+            #print(self.images_hr)
             self.images_hr, self.images_lr = self._scan()
+            print(self.images_lr)
             if args.ext.find('reset') >= 0:
                 print('Preparing seperated binary files')
+
                 for v in self.images_hr:
-                    hr = misc.imread(v)
+                    print(v)
+                    hr = imageio.imread(v)
                     name_sep = v.replace(self.ext, '.npy')
                     np.save(name_sep, hr)
                 for si, s in enumerate(self.noise_g):
                     for v in self.images_lr[si]:
-                        lr = misc.imread(v)
+                        lr = imageio.imread(v)
                         name_sep = v.replace(self.ext, '.npy')
                         np.save(name_sep, lr)
 

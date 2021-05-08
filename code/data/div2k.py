@@ -26,6 +26,7 @@ class DIV2K(srdata.SRData):
 
         for i in range(idx_begin + 1, idx_end + 1):
             filename = '{:0>4}'.format(i)
+            print(self.dir_hr)
             list_hr.append(os.path.join(self.dir_hr, filename + self.ext))
             for si, s in enumerate(self.noise_g):
                 list_lr[si].append(os.path.join(

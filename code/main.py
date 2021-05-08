@@ -1,4 +1,5 @@
 import torch
+import os
 
 import utility
 import data
@@ -11,6 +12,8 @@ from torch.nn import DataParallel
 torch.manual_seed(args.seed)
 checkpoint = utility.checkpoint(args)
 
+print(os.getcwd())
+
 if checkpoint.ok:
     loader = data.Data(args)
     model = model.Model(args, checkpoint)
@@ -19,7 +22,7 @@ if checkpoint.ok:
     t = Trainer(args, loader, model, loss, checkpoint)
     while not t.terminate():
         t.train()
-        t.test()
+    #     t.test()
 
     checkpoint.done()
 

@@ -3,7 +3,7 @@ import os.path
 import random
 import math
 import errno
-
+import imageio
 from data import common
 
 import numpy as np
@@ -20,15 +20,16 @@ class MyImage(data.Dataset):
         self.name = 'MyImage'
         self.noise_g = args.noise_g
         self.idx_scale = 0
-        apath = args.testpath + '/' + args.testset + '/X' + str(args.noise_g[0])
-
+        apath = os.path.join('../../data/SIDD_train/Clean/') # + '/' + args.testset + '/X' + str(args.noise_g[0])
+        print(apath)
         self.filelist = []
         self.imnamelist = []
         if not train:
             for f in os.listdir(apath):
                 try:
                     filename = os.path.join(apath, f)
-                    misc.imread(filename)
+                    print(filename)
+                    imageio.imread(filename)
                     self.filelist.append(filename)
                     self.imnamelist.append(f)
                 except:
@@ -37,7 +38,7 @@ class MyImage(data.Dataset):
     def __getitem__(self, idx):
         filename = os.path.split(self.filelist[idx])[-1]
         filename, _ = os.path.splitext(filename)
-        lr = misc.imread(self.filelist[idx])
+        lr = imageio.imread(self.filelist[idx])
         lr = common.set_channel([lr], self.args.n_colors)[0]
 
         return common.np2Tensor([lr], self.args.rgb_range)[0], -1, filename

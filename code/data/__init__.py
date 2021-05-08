@@ -17,6 +17,7 @@ class Data:
         if not args.test_only:
             module_train = import_module('data.' + args.data_train.lower())
             trainset = getattr(module_train, args.data_train)(args)
+            print(trainset)
             self.loader_train = MSDataLoader(
                 args,
                 trainset,
