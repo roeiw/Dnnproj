@@ -1,5 +1,6 @@
 import os
 import torch
+import torchvision
 import pandas as pd
 from skimage import io, transform
 from skimage.transform import warp, AffineTransform, rotate
@@ -10,7 +11,6 @@ from torchvision import transforms, utils
 import math
 
 class SIDD(Dataset):
-    """Face Landmarks dataset."""
 
     def __init__(self, csv_file, root_dir, transform=None):
         """
@@ -38,6 +38,33 @@ class SIDD(Dataset):
         if self.transform:
             GT_image = self.transform(GT_image)
             NOISY_image = self.transform(NOISY_image)
-        sample = {'GT_image': GT_image, 'NOISY_image': NOISY_image}
+        sample = {'GT_image': GT_image, 'NOISY_image': NOISY_image, 'image_name':GT_img_name}
 
         return sample
+
+
+
+
+# train_dataset = SIDD('../data/image_csv.csv','./data/image_csv.csv')
+#
+# train_dataloders = torch.utils.data.DataLoader(train_dataset, batch_size=4, shuffle=True, num_workers=2)
+#
+# data = next(iter(train_dataloders))
+# gt = data['GT_image']
+# nois = data['NOISY_image']
+# name = data['image_name']
+# gt = gt.permute((0,3,1,2))
+# inp = torchvision.utils.make_grid(gt)
+#
+# nois = nois.permute((0,3,1,2))
+# inp2 = torchvision.utils.make_grid(nois)
+#
+# # print(type(img_list[1]))
+#
+# print(inp.shape)
+#
+# imshow(inp)
+# plt.show()
+# imshow(inp2)
+# plt.show()
+#

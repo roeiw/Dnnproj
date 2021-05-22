@@ -1,1 +1,24 @@
 [Epoch 2]	Learning rate: 1.00e-4
+[Epoch 2]	Learning rate: 1.00e-4
+[Epoch 0]	Learning rate: 1.00e-4
+[Epoch 0]	Learning rate: 1.00e-4
+[Epoch 0]	Learning rate: 1.00e-4
+[Epoch 0]	Learning rate: 1.00e-4
+[Epoch 0]	Learning rate: 1.00e-4
+[Epoch 0]	Learning rate: 1.00e-4
+[Epoch 0]	Learning rate: 1.00e-4
+[Epoch 0]	Learning rate: 1.00e-4
+[Epoch 0]	Learning rate: 1.00e-4
+[Epoch 0]	Learning rate: 1.00e-4
+[1/17999]	8.252351830221427	3443.7+526283.0s
+[Epoch 0]	Learning rate: 1.00e-4
+[1/17999]	2.156415334641453	2545.4+2866823.3s
+[Epoch 0]	Learning rate: 1.00e-4
+[1/17999]	1.9176978362229833	2544.9+2865418.5s
+[Epoch 0]	Learning rate: 1.00e-4
+[Epoch 0]	Learning rate: 1.00e-4
+[1/331757]	0.007905360340161907	4.2+4.9s
+[Epoch 0]	Learning rate: 1.00e-4
+[1/331757]	0.552019747432	46268.7+962444556.7s
+[Epoch 1]	Learning rate: 1.00e-4
+[2/331757]	0.22642029414408102	46498.4+962504447.0s

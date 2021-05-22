@@ -1,6 +1,8 @@
 import torch.nn as nn
 from model import ops
 from model import common
+from option import args
+
 
 def make_model(args, parent=False):
     return RIDNET(args)
@@ -48,7 +50,9 @@ class RIDNET(nn.Module):
     def __init__(self, args):
         super(RIDNET, self).__init__()
         
+        # n_feats = args.n_feats
         n_feats = args.n_feats
+
         kernel_size = 3
         reduction = args.reduction 
         
@@ -79,6 +83,6 @@ class RIDNET(nn.Module):
 
         res = self.tail(b_out)
         out = self.add_mean(res)
-        f_out = out + x 
+        f_out = out + x
 
         return f_out 

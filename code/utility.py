@@ -1,3 +1,4 @@
+import torchvision
 import os
 import math
 import time
@@ -198,3 +199,19 @@ def make_scheduler(args, my_optimizer):
 
     return scheduler
 
+def imshow(data):
+    gt = data['GT_image']
+    nois = data['NOISY_image']
+    name = data['image_name']
+    gt = gt.permute((0,3,1,2))
+    inp = torchvision.utils.make_grid(gt)
+    nois = nois.permute((0,3,1,2))
+    inp2 = torchvision.utils.make_grid(nois)
+    inp = inp.numpy().transpose((1, 2, 0))
+    inp2 = inp2.numpy().transpose((1, 2, 0))
+    fig1 = plt.figure(1)
+    plt.imshow(inp)
+    fig1.show()
+    fig2 = plt.figure(2)
+    plt.imshow(inp2)
+    fig2.show()

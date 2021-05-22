@@ -9,47 +9,28 @@ import scipy.misc as misc
 import matplotlib.pyplot as plt
 import torch
 import torch.utils.data as data
+from model import ridnet
+import SIDD_Dataset
+from option import args
+from train import Trainer
+import torch.nn as nn
+import utility
+from torchvision import transforms
 
-class Demo(data.Dataset):
-    def __init__(self, args, train=False):
-        self.args = args
-        #self.name = 'Demo'
-        #self.scale = args.scale
-        #self.idx_scale = 0
-        self.train = False
-        self.benchmark = False
+model_path = '../models/'
 
-        self.filelist = []
-        # print(args.dir_demo)
-        for f in os.listdir(args.dir_demo):
-            # print("got in for")
-            if f.find('.PNG') >= 0:
-                print("got in if")
-                self.filelist.append(os.path.join(args.dir_demo, f))
-       # / print(len(self.filelist))
-        self.filelist.sort()
+transform = transforms.Compose([
+    transforms.ToTensor()
+])
+train_dataset = SIDD_Dataset.SIDD('../data/patches/image_csv.csv','./data/patches/image_csv.csv', transform)
 
-    def __getitem__(self, idx):
-        filename = os.path.split(self.filelist[idx])[-1]
-        print(filename)
-        filename, _ = os.path.splitext(filename)
-        lr = io.imread(self.filelist[idx])
-        #lr = np.asfarray(lr)
-        #lr = common.set_channel([lr], self.args.n_colors)[0]
+train_dataloders = torch.utils.data.DataLoader(train_dataset, batch_size=8, shuffle=True, num_workers=4)
+test_dataloders = torch.utils.data.DataLoader(train_dataset, batch_size=4, shuffle=True, num_workers=2)
 
-        return lr
+model = ridnet.RIDNET(args)
+loss = nn.L1Loss()
 
-    def __len__(self):
-        return len(self.filelist)
-
-    # def set_scale(self, idx_scale):
-    #     self.idx_scale = idx_scale
-    #
+t = Trainer(args, test_dataloders,train_dataloders, model, loss, utility.checkpoint(args), model_path+'model1.pt')
+t.train()
 
 
-datadata = Demo(args)
-image = datadata[0]
-# print(image[0].numpy())
-# torch.
-plt.imshow(image)
-plt.show()

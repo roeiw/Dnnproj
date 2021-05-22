@@ -10,7 +10,7 @@ from tqdm import tqdm
 
 
 class Trainer():
-    def __init__(self, args, test_loader,train_loader, my_model, my_loss, ckp):
+    def __init__(self, args, test_loader,train_loader, my_model, my_loss, ckp, path):
         self.args = args
         self.noise_g = args.noise_g
 
@@ -19,9 +19,10 @@ class Trainer():
         self.test_loader = test_loader
         self.model = my_model
         self.loss = my_loss
-        self.optimizer = args.optimizer
-        self.scheduler = args.scheduler
+        self.optimizer = utility.make_optimizer(args,self.model)
+        self.scheduler = utility.make_scheduler(args,self.optimizer)
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        self.path = path
 
         # if self.args.load != '.':
         #     self.optimizer.load_state_dict(
@@ -33,19 +34,21 @@ class Trainer():
 
     def train(self):
         self.model.train()
-        for epoch in range(self.args.num_of_epochs):
+        for epoch in range(2):
             timer_data, timer_model = utility.timer(), utility.timer()
             lr = self.scheduler.get_lr()[0]
             running_loss = 0
             self.ckp.write_log(
                 '[Epoch {}]\tLearning rate: {:.2e}'.format(epoch, Decimal(lr)))
-            for batch,(gt_image,noisy_image) in enumerate(self.train_loader):
+            for batch, data in enumerate(self.train_loader):
+                gt_image = data['GT_image']
+                noisy_image = data['NOISY_image']
+                name = data['image_name']
                 self.optimizer.zero_grad()
 
                 # plt.imshow(lr.permute(1,2,0))
                 timer_data.hold()
                 timer_model.tic()
-
                 pred_image = self.model(noisy_image)
                 loss = self.loss(pred_image, gt_image)
                 if loss.item() < self.args.skip_threshold * self.error_last:
@@ -57,6 +60,8 @@ class Trainer():
                     ))
                 running_loss += loss.item()*gt_image.size(0)
                 timer_model.hold()
+                print("batch: ", batch)
+
 
             self.ckp.write_log('[{}/{}]\t{}\t{:.1f}+{:.1f}s'.format(
                 (epoch + 1) ,
@@ -67,6 +72,7 @@ class Trainer():
 
             timer_data.tic()
             self.scheduler.step()
+        torch.save(self.model.state_dict(), self.path)
 
 def test(self):
 
@@ -80,7 +86,7 @@ def test(self):
         # running_loss=0
         eval_acc = 0
         tqdm_test = tqdm(self.loader_test, ncols=80)
-        for i,(gt_image,noisy_image) in enumerate(tqdm_test):
+        for i,(gt_image,noisy_image,name) in enumerate(tqdm_test):
             # no_eval = (hr.nelement() == 1)
             # if not no_eval:
             #     lr, hr = self.prepare([lr, hr])
@@ -105,6 +111,7 @@ def test(self):
     #     '[{} x{}]\tPSNR: {:.3f} (Best: {:.3f} @epoch {})'.format(
     #         self.args.data_test,                  )
     # )
+
 #
 # self.ckp.write_log(
 #     'Total time: {:.2f}s\n'.format(timer_test.toc()), refresh=True
