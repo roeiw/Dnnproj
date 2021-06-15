@@ -1,6 +1,7 @@
 import torch.nn as nn
 from model import ops
 from model import common
+import torch
 from option import args
 
 
@@ -22,7 +23,7 @@ class CALayer(nn.Module):
         y = self.avg_pool(x)
         y1 = self.c1(y)
         y2 = self.c2(y1)
-        return x * y2
+        return x*y2
 
 class Block(nn.Module):
     def __init__(self, in_channels, out_channels, group=1):
@@ -73,8 +74,8 @@ class RIDNET(nn.Module):
 
     def forward(self, x):
 
-        s = self.sub_mean(x)
-        h = self.head(s)
+       # s = self.sub_mean(x)
+        h = self.head(x)
 
         b1 = self.b1(h)
         b2 = self.b2(b1)
@@ -82,7 +83,7 @@ class RIDNET(nn.Module):
         b_out = self.b4(b3)
 
         res = self.tail(b_out)
-        out = self.add_mean(res)
-        f_out = out + x
+        #  out = self.add_mean(b_out)
+        f_out = res + x
 
         return f_out 

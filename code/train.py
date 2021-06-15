@@ -20,7 +20,8 @@ class Trainer():
         self.model = my_model
         self.loss = my_loss
         self.optimizer = utility.make_optimizer(args,self.model)
-        self.scheduler = utility.make_scheduler(args,self.optimizer)
+        # self.scheduler = utility.make_scheduler(args,self.optimizer)
+        self.scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer,1,0.5)
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.path = path
 
@@ -34,9 +35,9 @@ class Trainer():
 
     def train(self):
         self.model.train()
-        for epoch in range(2):
+        for epoch in range(3):
             timer_data, timer_model = utility.timer(), utility.timer()
-            lr = self.scheduler.get_lr()[0]
+            lr = 1e-4
             running_loss = 0
             self.ckp.write_log(
                 '[Epoch {}]\tLearning rate: {:.2e}'.format(epoch, Decimal(lr)))
@@ -51,16 +52,17 @@ class Trainer():
                 timer_model.tic()
                 pred_image = self.model(noisy_image)
                 loss = self.loss(pred_image, gt_image)
-                if loss.item() < self.args.skip_threshold * self.error_last:
-                    loss.backward()
-                    self.optimizer.step()
-                else:
-                    print('Skip this batch {}! (Loss: {})'.format(
-                        batch + 1, loss.item()
-                    ))
+                # if loss.item() < self.args.skip_threshold * self.error_last:
+                loss.backward()
+                self.optimizer.step()
+                # else:
+                #     print('Skip this batch {}! (Loss: {})'.format(
+                #         batch + 1, loss.item()
+                #     ))
                 running_loss += loss.item()*gt_image.size(0)
                 timer_model.hold()
-                print("batch: ", batch)
+                if batch % 2000 == 0:
+                    print("Loss on batch: ", batch, " is: ", loss.item())
 
 
             self.ckp.write_log('[{}/{}]\t{}\t{:.1f}+{:.1f}s'.format(
