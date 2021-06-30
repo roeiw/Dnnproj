@@ -36,6 +36,7 @@ class SIDD(Dataset):
         GT_img_name = str(self.landmarks_frame.iloc[idx, 0])
         GT_img_name = GT_img_name+'.PNG'
         noisy_image_name = GT_img_name.replace("GT", "NOISY")
+
         GT_image = io.imread(GT_img_name)
         NOISY_image = io.imread(noisy_image_name)
         if self.transform:
@@ -52,11 +53,7 @@ class rotate_by_90_mul(object):
         self.degree = random.choice(deg_list)
 
     def __call__(self, image):
-        print("before trans",type(image))
         image = TF.rotate(image,self.degree)
-
-
-        print("after trans",type(image))
         return image
 
 

@@ -55,7 +55,7 @@ def PSNR(original, compressed):
     mse = np.mean((original - compressed) ** 2)
     if(mse == 0):  # MSE is zero means no noise is present in the signal .
                   # Therefore PSNR have no importance.
-        return 100
+        return 1000
     max_pixel = 1.0
     psnr = 20 * log10(max_pixel / sqrt(mse))
     return psnr
@@ -88,15 +88,15 @@ def test_image(gt_path, noisy_path, model_path, transform, show = True, psnr = T
 
     #at this point this is np
 
-    print(gt_image.shape)
-    print(predicted_image.shape)
+    #print(gt_image.shape)
+    #print(predicted_image.shape)
 
     # loss = nn.L1Loss()
     # print(loss(gt_image,predicted_image))
     psnr_val =0
     if psnr and not gt_path is None:
-        psnr_val = PSNR(predicted_image, gt_image)
-        print("PSNR is: ",psnr_val)
+       psnr_val = PSNR(predicted_image, gt_image)
+       print("PSNR is: ",psnr_val)
     ssim_val = 0
     if ssim and not gt_path is None:
         ssim_val = calc_ssim(predicted_image,gt_image)
@@ -107,26 +107,58 @@ def test_image(gt_path, noisy_path, model_path, transform, show = True, psnr = T
         cv2.imshow("predicted image", predicted_image)
         if gt_path != None:
             cv2.imshow("gt image", gt_image)
+        noisy_name = noisy_path.split('/')[-2] + '_' + noisy_path.split('/')[-1]
+        print(noisy_name)
+        predicted_name = noisy_name.replace('NOISY','PRD')
+        gt_name = noisy_name.replace('NOISY','GT')
+        print(noisy_name)
+        cv2.imwrite('../../output_results/'+predicted_name,(predicted_image*255).astype('uint8'))
+        cv2.imwrite('../../output_results/'+noisy_name,(transformed_noisy.squeeze(0).permute(1,2,0).numpy()*255).astype('uint8'))
+        # cv2.imwrite('../../output_results/'+gt_name,(gt_image*255).astype('uint8'))
         cv2.waitKey(0)
 
+
     return psnr_val, ssim_val
+
+
+
 # N_mat_path = '../test/ValidationNoisyBlocksSrgb.mat'
 # gt_mat_path = '../test/ValidationGtBlocksSrgb.mat'
 # # noisy_path = '../test/'
 #
 #
-noisy_path = '../data/0055_003_N6_00800_01000_5500_N/NOISY_SRGB_010.PNG'
-gt_path = noisy_path.replace('NOISY', 'GT')
+def main():
+    nam_path = '../../data/Nam/Canon_EOS_5D_Mark3/ISO_3200/C_3.mat'
+    nam_mat = loadmat(nam_path)
+    nam_name = (nam_path.split('/')[-2] +'_' + nam_path.split('/')[-1]).replace('mat','PNG')
+    print(nam_name)
+    print(nam_mat.keys())
+    print(nam_mat['img_mean'].shape)
+    print(nam_mat['img_cov'].shape)
+    print(nam_mat['img_noisy'].shape)
+    im1 = nam_mat['img_cov'].astype('uint8')
+    im2 = nam_mat['img_mean'].astype('uint8')
+    print(type(im1))
+    cv2.imwrite('../../data/Nam/nam_actual/'+'canon_mean_11'+ nam_name,im2)
+    # cv2.waitKey(0)
+    return 0
+    num_img, num_blocks, _, _, _ = nam_mat['ValidationNoisyBlocksSrgb'].shape
 
-transform = transforms.Compose([
-    transforms.ToTensor(),
-    transforms.RandomCrop(512)
-     ])
-#model = ridnet.RIDNET(args)
-model_path = '../models/6421_nomean.pt'
+    noisy_path = '../test/0046_002_G4_00400_00350_3200_L/0046_NOISY_SRGB_010.PNG'
+    gt_path = noisy_path.replace('NOISY', 'GT')
+    #
+    transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.RandomCrop(850)
+         ])
+    # #model = ridnet.RIDNET(args)
+    model_path = '../models/27621_l2.pt'
+    #
+    test_image(None,noisy_path,model_path,transform)
+    return 0
 
-# test_image(gt_path,noisy_path,model_path,transform)
-
+if __name__ == '__main__':
+    main()
 
 # sig_image = trans1(sig_image)
 # print("before net")

@@ -41,7 +41,7 @@ num_img, num_blocks, _ , _ , _ = n_mat['ValidationNoisyBlocksSrgb'].shape
 num_samples = num_img*num_blocks
 
 model = ridnet.RIDNET(args)
-model_path = '../models/6421_nomean.pt'
+model_path = '../models/27621_l2.pt'
 
 model.load_state_dict(torch.load(model_path))
 model.eval()
@@ -49,17 +49,20 @@ model.eval()
 total_ssim =0
 total_psnr =0
 totensor = transforms.ToTensor()
-test_path = '../test/0056_003_N6_03200_04000_5500_N/0056_NOISY_SRGB_010.PNG'
-model_result.test_image(None,test_path,model_path,totensor)
+# test_path = '../test/0056_003_N6_03200_04000_5500_N/0056_NOISY_SRGB_010.PNG'
+# model_result.test_image(None,test_path,model_path,totensor)
 
-#pred_img = model_result.pass_though_net(model,n_mat['ValidationNoisyBlocksSrgb'][3][5])
+# pred_img = model_result.pass_though_net(model,n_mat['ValidationNoisyBlocksSrgb'][3][5])
+
+# plt.imshow(pred_img)
+
+
 
 # cv2.imshow("pred_img", pred_img)
 
 for i in range(num_img):
     for j in range(num_blocks):
         psnr,ssim = model_result.test_image(gt_mat['ValidationGtBlocksSrgb'][i][j],n_mat['ValidationNoisyBlocksSrgb'][i][j],model_path,totensor,show=False)
-
         total_ssim += ssim
         total_psnr += psnr
         # cv2.imshow("pred_img", pred_img)

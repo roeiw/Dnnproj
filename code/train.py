@@ -19,10 +19,11 @@ class Trainer():
         self.test_loader = test_loader
         self.model = my_model
         self.loss = my_loss
-        self.optimizer = utility.make_optimizer(args,self.model)
+        self.optimizer = torch.optim.Adam(self.model.parameters(),lr=1e-4)
         # self.scheduler = utility.make_scheduler(args,self.optimizer)
         self.scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer,1,0.5)
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        print(self.device)
         self.path = path
 
         # if self.args.load != '.':
@@ -37,10 +38,9 @@ class Trainer():
         self.model.train()
         for epoch in range(3):
             timer_data, timer_model = utility.timer(), utility.timer()
-            lr = 1e-4
             running_loss = 0
-            self.ckp.write_log(
-                '[Epoch {}]\tLearning rate: {:.2e}'.format(epoch, Decimal(lr)))
+            # self.ckp.write_log(
+                # '[Epoch {}]\tLearning rate: {:.2e}'.format(epoch, Decimal(lr)))
             for batch, data in enumerate(self.train_loader):
                 gt_image = data['GT_image']
                 noisy_image = data['NOISY_image']
