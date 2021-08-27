@@ -9,8 +9,9 @@ small_patch_size = 80
 
 print(os.getcwd())
 
-path_to_data = "../../data/medium/SIDD_Medium_Srgb/Data/SIDD_Medium_Srgb/Data/"
-path_to_patches = "../data/patches/medium/"
+path_to_data = '../../../PycharmProjects/Data/SIDD_medium/SIDD_medium/SIDD_Medium_Srgb/Data/'
+
+path_to_patches = "../../../PycharmProjects/Data/SIDD_medium/Patches/"
 csv_path = path_to_patches + "image_csv.csv"
 
 with open(csv_path, "w") as csv_in:

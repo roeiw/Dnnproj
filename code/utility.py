@@ -16,6 +16,66 @@ import torch
 import torch.optim as optim
 import torch.optim.lr_scheduler as lrs
 
+
+def xyz2lab(xyz):
+    # 0.95047, 1., 1.08883 # white
+    sc = torch.Tensor((0.95047, 1., 1.08883))[None,:,None,None]
+    if(xyz.is_cuda):
+        sc = sc.cuda()
+
+    xyz_scale = xyz/sc
+
+    mask = (xyz_scale > .008856).type(torch.FloatTensor)
+    if(xyz_scale.is_cuda):
+        mask = mask.cuda()
+
+    xyz_int = xyz_scale*(1/3.)*mask + (7.787*xyz_scale + 16./116.)*(1-mask)
+
+    L = 116.*xyz_int[:,1,:,:]-16.
+    a = 500.*(xyz_int[:,0,:,:]-xyz_int[:,1,:,:])
+    b = 200.*(xyz_int[:,1,:,:]-xyz_int[:,2,:,:])
+    out = torch.cat((L[:,None,:,:],a[:,None,:,:],b[:,None,:,:]),dim=1)
+
+    # if(torch.sum(torch.isnan(out))>0):
+        # print('xyz2lab')
+        # embed()
+
+    return out
+
+
+def rgb2xyz(rgb): # rgb from [0,1]
+    # xyz_from_rgb = np.array([[0.412453, 0.357580, 0.180423],
+        # [0.212671, 0.715160, 0.072169],
+        # [0.019334, 0.119193, 0.950227]])
+
+    mask = (rgb > .04045).type(torch.FloatTensor)
+    if(rgb.is_cuda):
+        mask = mask.cuda()
+
+    rgb = (((rgb+.055)/1.055)*2.4)*mask + rgb/12.92*(1-mask)
+
+    x = .412453*rgb[:,0,:,:]+.357580*rgb[:,1,:,:]+.180423*rgb[:,2,:,:]
+    y = .212671*rgb[:,0,:,:]+.715160*rgb[:,1,:,:]+.072169*rgb[:,2,:,:]
+    z = .019334*rgb[:,0,:,:]+.119193*rgb[:,1,:,:]+.950227*rgb[:,2,:,:]
+    out = torch.cat((x[:,None,:,:],y[:,None,:,:],z[:,None,:,:]),dim=1)
+
+
+    # if(torch.sum(torch.isnan(out))>0):
+        # print('rgb2xyz')
+        # embed()
+    return out
+
+
+def rgb2lab(rgb):
+    return xyz2lab(rgb2xyz(rgb))
+
+
+def LabLoss(Loss, pred, gt):
+    lab_pred = rgb2lab(pred)
+    lab_gt = rgb2lab(gt)
+    loss = Loss(lab_pred,lab_gt)
+    return loss
+
 class timer():
     def __init__(self):
         self.acc = 0

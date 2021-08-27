@@ -3,7 +3,7 @@ import math
 from decimal import Decimal
 import matplotlib.pyplot as plt
 import utility
-
+import torch.nn as nn
 import torch
 from torch.autograd import Variable
 from tqdm import tqdm
@@ -19,6 +19,7 @@ class Trainer():
         self.test_loader = test_loader
         self.model = my_model
         self.loss = my_loss
+        self.l2 = nn.MSELoss()
         self.optimizer = torch.optim.Adam(self.model.parameters(),lr=1e-4)
         # self.scheduler = utility.make_scheduler(args,self.optimizer)
         self.scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer,1,0.5)
@@ -51,7 +52,7 @@ class Trainer():
                 timer_data.hold()
                 timer_model.tic()
                 pred_image = self.model(noisy_image)
-                loss = self.loss(pred_image, gt_image)
+                loss = self.loss(self.l2,pred_image, gt_image)
                 # if loss.item() < self.args.skip_threshold * self.error_last:
                 loss.backward()
                 self.optimizer.step()

@@ -63,14 +63,14 @@ class rotate_by_90_mul(object):
 
 
 
-train_dataset = SIDD('../data/patches/image_csv.csv','./data/image_csv.csv', transform=transforms.ToTensor())
+#train_dataset = SIDD('../data/patches/image_csv.csv','./data/image_csv.csv', transform=transforms.ToTensor())
 
-train_dataloders = torch.utils.data.DataLoader(train_dataset, batch_size=1, shuffle=True, num_workers=2)
+#train_dataloders = torch.utils.data.DataLoader(train_dataset, batch_size=1, shuffle=True, num_workers=2)
 
-data = next(iter(train_dataloders))
-gt = data['GT_image']
-nois = data['NOISY_image']
-name = data['image_name']
+# data = next(iter(train_dataloders))
+# gt = data['GT_image']
+# nois = data['NOISY_image']
+# name = data['image_name']
 # gt = gt.permute((0,3,1,2))
 
 # print(gt)

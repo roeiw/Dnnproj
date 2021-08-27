@@ -101,10 +101,20 @@ def test_image(gt_path, noisy_path, model_path, transform, show = True, psnr = T
     if ssim and not gt_path is None:
         ssim_val = calc_ssim(predicted_image,gt_image)
         print("SSIM is: ",ssim_val)
+    pred_rgb = cv2.cvtColor(predicted_image, cv2.COLOR_BGR2RGB)
+
+    # cv2.imshow("predicted image", (pred_rgb* 255).astype('uint8'))
+    # cv2.waitKey(0)
+    # print(pred_rgb)
+    #nois_rgb = cv2.cvtColor(transformed_noisy.squeeze(0).permute(1, 2, 0).numpy(), cv2.COLOR_BGR2RGB)
+    predicted_name = noisy_path.split('/')[-2] + '_' + noisy_path.split('/')[-1]# + '_pred.PNG'
+    cv2.imwrite('PycharmProjects/Data/presentation/pred/' + predicted_name, (pred_rgb* 255))
 
     if show:
-        cv2.imshow("noisy image", transformed_noisy.squeeze(0).permute(1,2,0).numpy())
-        cv2.imshow("predicted image", predicted_image)
+        nois_rgb = cv2.cvtColor(transformed_noisy.squeeze(0).permute(1,2,0).numpy(),cv2.COLOR_BGR2RGB)
+        pred_rgb = cv2.cvtColor(predicted_image,cv2.COLOR_BGR2RGB)
+        cv2.imshow("noisy image",nois_rgb)
+        cv2.imshow("predicted image", pred_rgb)
         if gt_path != None:
             cv2.imshow("gt image", gt_image)
         noisy_name = noisy_path.split('/')[-2] + '_' + noisy_path.split('/')[-1]
@@ -116,8 +126,11 @@ def test_image(gt_path, noisy_path, model_path, transform, show = True, psnr = T
         cv2.imwrite('../../output_results/'+noisy_name,(transformed_noisy.squeeze(0).permute(1,2,0).numpy()*255).astype('uint8'))
         # cv2.imwrite('../../output_results/'+gt_name,(gt_image*255).astype('uint8'))
         cv2.waitKey(0)
-
-
+    # nois_rgb = cv2.cvtColor(transformed_noisy.squeeze(0).permute(1, 2, 0).numpy(), cv2.COLOR_BGR2RGB)
+    # pred_rgb = cv2.cvtColor(predicted_image, cv2.COLOR_BGR2RGB)
+    # predicted_name = noisy_path.split('/')[-2] + '_' + noisy_path.split('/')[-1] +'_pred.PNG'
+    # cv2.imwrite('PycharmProjects/Data/presentation/pred/' + predicted_name, pred_rgb)
+#(predicted_image * 255).astype('uint8')
     return psnr_val, ssim_val
 
 
@@ -128,33 +141,38 @@ def test_image(gt_path, noisy_path, model_path, transform, show = True, psnr = T
 #
 #
 def main():
-    nam_path = '../../data/Nam/Canon_EOS_5D_Mark3/ISO_3200/C_3.mat'
-    nam_mat = loadmat(nam_path)
-    nam_name = (nam_path.split('/')[-2] +'_' + nam_path.split('/')[-1]).replace('mat','PNG')
-    print(nam_name)
-    print(nam_mat.keys())
-    print(nam_mat['img_mean'].shape)
-    print(nam_mat['img_cov'].shape)
-    print(nam_mat['img_noisy'].shape)
-    im1 = nam_mat['img_cov'].astype('uint8')
-    im2 = nam_mat['img_mean'].astype('uint8')
-    print(type(im1))
-    cv2.imwrite('../../data/Nam/nam_actual/'+'canon_mean_11'+ nam_name,im2)
-    # cv2.waitKey(0)
-    return 0
-    num_img, num_blocks, _, _, _ = nam_mat['ValidationNoisyBlocksSrgb'].shape
+    # print(os.listdir())
+    # homepath = '../'
+    # return 0
+    # nam_path = 'PycharmProjects/Data/Nam/Nam_mat/Nikon_D800/ISO_6400/B_3.mat'
+    # nam_mat = loadmat(nam_path)
+    # nam_name = (nam_path.split('/')[-2] +'_' + nam_path.split('/')[-1]).replace('mat','PNG')
+    # print(nam_name)
+    # print(nam_mat.keys())
+    # print(nam_mat['img_mean'].shape)
+    # print(nam_mat['img_cov'].shape)
+    # print(nam_mat['img_noisy'].shape)
+    # im1 = nam_mat['img_cov'].astype('uint8')
+    # im2 = nam_mat['img_mean'].astype('uint8')
+    # print(type(im1))
+    # rgb_im = cv2.cvtColor(im2, cv2.COLOR_BGR2RGB)
+    # cv2.imwrite('PycharmProjects/Data/Nam/Nam_data/D800/'+ nam_name,rgb_im)
+    # # cv2.waitKey(0)
+    # return 0
+    # num_img, num_blocks, _, _, _ = nam_mat['ValidationNoisyBlocksSrgb'].shape
 
-    noisy_path = '../test/0046_002_G4_00400_00350_3200_L/0046_NOISY_SRGB_010.PNG'
+    noisy_path = 'PycharmProjects/Data/presentation/ISO_3200_C_2_cr.png'#'../test/0046_002_G4_00400_00350_3200_L/0046_NOISY_SRGB_010.PNG'
     gt_path = noisy_path.replace('NOISY', 'GT')
     #
     transform = transforms.Compose([
         transforms.ToTensor(),
-        transforms.RandomCrop(850)
+        # transforms.RandomCrop(850)
          ])
     # #model = ridnet.RIDNET(args)
-    model_path = '../models/27621_l2.pt'
+    model_path = 'PycharmProjects/Dnnproj/models/27621_l2.pt'
     #
-    test_image(None,noisy_path,model_path,transform)
+    psnr, ssim = test_image(None,noisy_path,model_path,transform, show=False)
+    print("psnr is: "+ str(psnr) + " ssim is: "+ str(ssim))
     return 0
 
 if __name__ == '__main__':
