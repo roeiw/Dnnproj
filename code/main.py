@@ -6,7 +6,6 @@ import data
 import model
 import loss
 from option import args
-from trainer import Trainer
 from torch.nn import DataParallel
 
 torch.manual_seed(args.seed)

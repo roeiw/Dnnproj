@@ -51,11 +51,11 @@ class RIDNET(nn.Module):
     def __init__(self, args):
         super(RIDNET, self).__init__()
         
-        # n_feats = args.n_feats
         n_feats = args.n_feats
+        # n_feats = args.n_feats
 
         kernel_size = 3
-        reduction = args.reduction 
+        # reduction = args.reduction
         
         rgb_mean = (0.4488, 0.4371, 0.4040)
         rgb_std = (1.0, 1.0, 1.0)

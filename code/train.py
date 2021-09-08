@@ -10,22 +10,22 @@ from tqdm import tqdm
 
 
 class Trainer():
-    def __init__(self, args, test_loader,train_loader, my_model, my_loss, ckp, path):
+    def __init__(self, args, test_loader,train_loader, my_model, my_loss, ckp):
         self.args = args
-        self.noise_g = args.noise_g
 
         self.ckp = ckp
         self.train_loader = train_loader
         self.test_loader = test_loader
         self.model = my_model
         self.loss = my_loss
-        self.l2 = nn.MSELoss()
-        self.optimizer = torch.optim.Adam(self.model.parameters(),lr=1e-4)
+        self.optimizer = torch.optim.Adam(self.model.parameters(),lr=args.lr)
         # self.scheduler = utility.make_scheduler(args,self.optimizer)
-        self.scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer,1,0.5)
+        self.scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer,1,args.gamma)
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         print(self.device)
-        self.path = path
+        self.path = args.model_path
+        self.epochs = args.epochs
+        print(self.path)
 
         # if self.args.load != '.':
         #     self.optimizer.load_state_dict(
@@ -37,7 +37,7 @@ class Trainer():
 
     def train(self):
         self.model.train()
-        for epoch in range(3):
+        for epoch in range(self.epochs):
             timer_data, timer_model = utility.timer(), utility.timer()
             running_loss = 0
             # self.ckp.write_log(
@@ -52,7 +52,7 @@ class Trainer():
                 timer_data.hold()
                 timer_model.tic()
                 pred_image = self.model(noisy_image)
-                loss = self.loss(self.l2,pred_image, gt_image)
+                loss = self.loss(pred_image, gt_image)
                 # if loss.item() < self.args.skip_threshold * self.error_last:
                 loss.backward()
                 self.optimizer.step()
@@ -62,7 +62,7 @@ class Trainer():
                 #     ))
                 running_loss += loss.item()*gt_image.size(0)
                 timer_model.hold()
-                if batch % 2000 == 0:
+                if batch % 500 == 0:
                     print("Loss on batch: ", batch, " is: ", loss.item())
 
 

@@ -19,15 +19,23 @@ from skimage.metrics import _structural_similarity as ssim
 from torchvision import transforms
 import cv2
 
-model_path = '../Models2/'
+model_path = "../models/"
 # loaded_model_path = '../models/res_model4.pt'
 
+print(os.getcwd())
+print(os.listdir())
 transform = transforms.Compose([
     transforms.ToTensor(),
     transforms.RandomHorizontalFlip(),
     SIDD_Dataset.rotate_by_90_mul([0,90,180,270])
     ])
-train_dataset = SIDD_Dataset.SIDD("../../../PycharmProjects/Data/SIDD_medium/Patches/image_csv.csv","../../../PycharmProjects/Data/SIDD_medium/Patches/image_csv.csv", transform)
+# ../../../../roei.w@staff.technion.ac.il/Code/PycharmProjects/Data/SIDD_medium/Patches/image_csv.csv
+#PycharmProjects/Data/
+train_dataset = SIDD_Dataset.SIDD("Patches/image_csv.csv","Patches/", transform)
+
+# im1 = cv2.imread("Patches/0029_001_IP_00800_01000_5500_N/GT_18_3_010.PNG")
+# cv2.imshow("im1",im1)
+# cv2.waitKey(0)
 # print(os.getcwd())
 # dog_path = '../../../PycharmProjects/Data/presentation/dog_rni15_2.png'
 # dog2_path = '../../../PycharmProjects/Data/presentation/pred/presentation_dog_rni15_2.png'
@@ -35,6 +43,7 @@ train_dataset = SIDD_Dataset.SIDD("../../../PycharmProjects/Data/SIDD_medium/Pat
 train_dataloders = torch.utils.data.DataLoader(train_dataset, batch_size=16, shuffle=True, num_workers=2)
 test_dataloders = torch.utils.data.DataLoader(train_dataset, batch_size=4, shuffle=True, num_workers=0)
 
+# cv2.imshow("loaders",train_dataloders)
 model = ridnet.RIDNET(args)
 # num_trainable_params = sum([p.numel() for p in model.parameters() if p.requires_grad])
 # print("the number of trainable weights is: ", num_trainable_params)
@@ -52,9 +61,9 @@ model = ridnet.RIDNET(args)
 #
 # print(lab_dog)
 # loss = nn.MSELoss()
-LabLoss = utility.LabLoss
-
-t = Trainer(args, test_dataloders,train_dataloders, model, LabLoss, utility.checkpoint(args), model_path+'LabLoss_27821_l2.pt')
+# LabLoss = utility.LabLoss
+loss = utility.get_loss(args)
+t = Trainer(args, test_dataloders,train_dataloders, model, loss, utility.checkpoint(args))#, model_path+'LabLoss_6921_l1.pt')
 t.train()
 
 

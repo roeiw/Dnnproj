@@ -15,6 +15,7 @@ import scipy.misc as misc
 import torch
 import torch.optim as optim
 import torch.optim.lr_scheduler as lrs
+from torch.autograd import Variable
 
 
 def xyz2lab(xyz):
@@ -70,11 +71,120 @@ def rgb2lab(rgb):
     return xyz2lab(rgb2xyz(rgb))
 
 
-def LabLoss(Loss, pred, gt):
-    lab_pred = rgb2lab(pred)
-    lab_gt = rgb2lab(gt)
-    loss = Loss(lab_pred,lab_gt)
-    return loss
+def LabLoss_L1 (pred_batch, gt_batch):
+    batch = pred_batch.shape
+    # batch_loss = torch.empty(size = batch)
+    lab_batch_pred = torch.empty(size = batch)
+    lab_batch_gt = torch.empty(size = batch)
+    for i in range(batch[0]):
+        lab_batch_pred[i] = rgb_to_lab(pred_batch[i,:,:,:])
+        lab_batch_gt[i] = rgb_to_lab(gt_batch[i,:,:,:])
+        
+    loss = torch.abs(lab_batch_pred-lab_batch_gt)
+    return loss.mean()
+
+
+
+def rgb_to_lab(img):
+    """ PyTorch implementation of RGB to LAB conversion: https://docs.opencv.org/3.3.0/de/d25/imgproc_color_conversions.html
+    Based roughly on a similar implementation here: https://github.com/affinelayer/pix2pix-tensorflow/blob/master/pix2pix.py
+    :param img: image to be adjusted
+    :returns: adjusted image
+    :rtype: Tensor
+    """
+
+    img = img.permute(2, 1, 0)
+    shape = img.shape
+    img = img.contiguous()
+    img = img.view(-1, 3)
+
+    # all color transformation references are from brucelindbloom.com
+
+    # inverse srgb companding. 2.2 exponent also possible
+    img = ((img / 12.92) * img.le(0.04045).float() + (((torch.clamp(img, min=0.0001) + 0.055) / 1.055) ** 2.4) * img.gt(0.04045).float()).cuda()
+
+    # RGB -> XYZ (not xyz!)
+    # checked with lindbloom sRGB D65 matrix, slightly different. matrix from lindbloom:
+    # [0.4124564  0.3575761  0.1804375]
+    # [0.2126729  0.7151522  0.0721750]
+    # [0.0193339  0.1191920  0.9503041]
+    rgb_to_xyz = Variable(torch.FloatTensor([[0.412453, 0.212671, 0.019334], [0.357580, 0.715160, 0.119193], [0.180423, 0.072169, 0.950227]]), requires_grad = False).cuda()
+
+    # RGB -> XYZ step
+    img = torch.matmul(img, rgb_to_xyz)
+
+    # XYZ -> xyz step with reference white (0.950456, 1, 1.088754)
+    # closest to D65 chromatic adaption matrix
+    img = torch.mul(img, Variable(torch.FloatTensor([1 / 0.950456, 1.0, 1 / 1.088754]), requires_grad = False).cuda())
+
+    # third root of CIE epsilon of 0.008856
+    epsilon = 6 / 29
+
+    # xyz -> Lab
+    img = ((img / (3.0 * epsilon ** 2) + 4.0 / 29.0) * img.le(epsilon ** 3).float()) + (torch.clamp(img, min=0.0001) ** (1.0 / 3.0) * img.gt(epsilon ** 3).float())
+    fxfyfz_to_lab = Variable(torch.FloatTensor([[0.0, 500.0, 0.0],[116.0, -500.0, 200.0], [0.0, 0.0, -200.0]]), requires_grad = False).cuda()
+    img = torch.matmul(img, fxfyfz_to_lab) + Variable(torch.FloatTensor([-16.0, 0.0, 0.0]), requires_grad = False).cuda()
+
+    img = img.view(shape)
+    img = img.permute(2, 1, 0)
+
+    '''
+    L_chan: black and white with input range [0, 100]
+    a_chan/b_chan: color channels with input range ~[-110, 110], not exact 
+    [0, 100] => [0, 1],  ~[-110, 110] => [0, 1]
+    '''
+    img[0, :, :] = img[0, :, :] / 100
+    img[1, :, :] = (img[1, :, :] / 110 + 1) / 2
+    img[2, :, :] = (img[2, :, :] / 110 + 1) / 2
+
+    # ??? - check this
+    img[(img != img).detach()] = 0
+    img = img.contiguous()
+
+    return img.cuda()
+
+def lab_to_rgb(img):
+        """ PyTorch implementation of LAB to RGB conversion: https://docs.opencv.org/3.3.0/de/d25/imgproc_color_conversions.html
+        Based roughly on a similar implementation here: https://github.com/affinelayer/pix2pix-tensorflow/blob/master/pix2pix.py
+        :param img: image to be adjusted
+        :returns: adjusted image
+        :rtype: Tensor
+        """
+        img = img.permute(2, 1, 0)
+        shape = img.shape
+        img = img.contiguous()
+        img = img.view(-1, 3)
+        img_copy = img.clone()
+
+        img_copy[:, 0] = img[:, 0] * 100
+        img_copy[:, 1] = ((img[:, 1] * 2) - 1) * 110
+        img_copy[:, 2] = ((img[:, 2] * 2) - 1) * 110
+
+        img = img_copy.clone().cuda()
+        del img_copy
+
+        lab_to_fxfyfz = Variable(torch.FloatTensor([[1 / 116.0, 1 / 116.0, 1 / 116.0], [1 / 500.0, 0, 0], [0, 0, -1 / 200.0]]), requires_grad = False).cuda()
+
+        img = torch.matmul(img + Variable(torch.cuda.FloatTensor([16.0, 0.0, 0.0])), lab_to_fxfyfz)
+
+        epsilon = 6.0 / 29.0
+
+        img = (((3.0 * epsilon ** 2 * (img - 4.0 / 29.0)) * img.le(epsilon).float()) + ((torch.clamp(img, min=0.0001) ** 3.0) * img.gt(epsilon).float()))
+
+        # denormalize for D65 white point
+        img = torch.mul(img, Variable(torch.cuda.FloatTensor([0.950456, 1.0, 1.088754])))
+
+        xyz_to_rgb = Variable(torch.FloatTensor([[3.2404542, -0.9692660, 0.0556434], [-1.5371385, 1.8760108, -0.2040259], [-0.4985314, 0.0415560, 1.0572252]]), requires_grad = False).cuda()
+        img = torch.matmul(img, xyz_to_rgb)
+        img = (img * 12.92 * img.le(0.0031308).float()) + ((torch.clamp(img, min=0.0001) ** (1 / 2.4) * 1.055) - 0.055) * img.gt(0.0031308).float()
+
+        img = img.view(shape)
+        img = img.permute(2, 1, 0)
+
+        img = img.contiguous()
+        img[(img != img).detach()] = 0
+
+        return img
 
 class timer():
     def __init__(self):
@@ -191,6 +301,20 @@ def quantize(img, rgb_range):
     pixel_range = 255 / rgb_range
     return img.mul(pixel_range).clamp(0, 255).round().div(pixel_range)
 
+def calc_ssim(pred_img,gt_img):
+
+    return ssim(gt_img, pred_img, multichannel=True)
+
+
+def PSNR(original, compressed):
+    mse = np.mean((original - compressed) ** 2)
+    if(mse == 0):  # MSE is zero means no noise is present in the signal .
+                  # Therefore PSNR have no importance.
+        return 1000
+    max_pixel = 1.0
+    psnr = 20 * log10(max_pixel / sqrt(mse))
+    return psnr
+
 def calc_psnr(sr, hr, rgb_range):
     diff = (sr - hr).data.div(rgb_range)
 
@@ -219,45 +343,58 @@ def calc_psnr(sr, hr, rgb_range):
 
     return -10 * math.log10(mse)
 
-def make_optimizer(args, my_model):
-    trainable = filter(lambda x: x.requires_grad, my_model.parameters())
+def get_loss(args):
+    loss_type = args.loss
+    if loss_type == 'MSE':
+        loss_function = nn.MSELoss()
+    elif loss_type == 'L1':
+        loss_function = nn.L1Loss()
+    elif loss_type.find('Lab_L1') >= 0:
+        loss_function = LabLoss_L1
 
-    if args.optimizer == 'SGD':
-        optimizer_function = optim.SGD
-        kwargs = {'momentum': args.momentum}
-    elif args.optimizer == 'ADAM':
-        optimizer_function = optim.Adam
-        kwargs = {
-            'betas': (args.beta1, args.beta2),
-            'eps': args.epsilon
-        }
-    elif args.optimizer == 'RMSprop':
-        optimizer_function = optim.RMSprop
-        kwargs = {'eps': args.epsilon}
+    elif loss_type.find('Lab_L2') >= 0:
+        loss_function = LabLoss_L2
 
-    kwargs['lr'] = args.lr
-    kwargs['weight_decay'] = args.weight_decay
-    
-    return optimizer_function(trainable, **kwargs)
+    return loss_function
+# def make_optimizer(args, my_model):
+#     trainable = filter(lambda x: x.requires_grad, my_model.parameters())
+#
+#     if args.optimizer == 'SGD':
+#         optimizer_function = optim.SGD
+#         kwargs = {'momentum': args.momentum}
+#     elif args.optimizer == 'ADAM':
+#         optimizer_function = optim.Adam
+#         kwargs = {
+#             'betas': (args.beta1, args.beta2),
+#             'eps': args.epsilon
+#         }
+#     elif args.optimizer == 'RMSprop':
+#         optimizer_function = optim.RMSprop
+#         kwargs = {'eps': args.epsilon}
+#
+#     kwargs['lr'] = args.lr
+#     kwargs['weight_decay'] = args.weight_decay
+#
+#     return optimizer_function(trainable, **kwargs)
 
-def make_scheduler(args, my_optimizer):
-    if args.decay_type == 'step':
-        scheduler = lrs.StepLR(
-            my_optimizer,
-            step_size=args.lr_decay,
-            gamma=args.gamma
-        )
-    elif args.decay_type.find('step') >= 0:
-        milestones = args.decay_type.split('_')
-        milestones.pop(0)
-        milestones = list(map(lambda x: int(x), milestones))
-        scheduler = lrs.MultiStepLR(
-            my_optimizer,
-            milestones=milestones,
-            gamma=args.gamma
-        )
-
-    return scheduler
+# def make_scheduler(args, my_optimizer):
+#     if args.decay_type == 'step':
+#         scheduler = lrs.StepLR(
+#             my_optimizer,
+#             step_size=args.lr_decay,
+#             gamma=args.gamma
+#         )
+#     elif args.decay_type.find('step') >= 0:
+#         milestones = args.decay_type.split('_')
+#         milestones.pop(0)
+#         milestones = list(map(lambda x: int(x), milestones))
+#         scheduler = lrs.MultiStepLR(
+#             my_optimizer,
+#             milestones=milestones,
+#             gamma=args.gamma
+#         )
+#
+#     return scheduler
 
 def imshow(data):
     gt = data['GT_image']
