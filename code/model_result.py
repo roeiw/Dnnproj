@@ -60,7 +60,6 @@ def PSNR(original, compressed):
     psnr = 20 * log10(max_pixel / sqrt(mse))
     return psnr
 
-
 def test_image(gt_path, noisy_path, model_path, transform, show = True, psnr = True, ssim = True):
     # model load
     model = ridnet.RIDNET(args)
@@ -88,50 +87,114 @@ def test_image(gt_path, noisy_path, model_path, transform, show = True, psnr = T
 
     #at this point this is np
 
-    #print(gt_image.shape)
-    #print(predicted_image.shape)
+
 
     # loss = nn.L1Loss()
     # print(loss(gt_image,predicted_image))
     psnr_val =0
     if psnr and not gt_path is None:
-       psnr_val = PSNR(predicted_image, gt_image)
-       print("PSNR is: ",psnr_val)
+        psnr_val = PSNR(predicted_image, gt_image)
     ssim_val = 0
     if ssim and not gt_path is None:
         ssim_val = calc_ssim(predicted_image,gt_image)
-        print("SSIM is: ",ssim_val)
-    pred_rgb = cv2.cvtColor(predicted_image, cv2.COLOR_BGR2RGB)
-
-    # cv2.imshow("predicted image", (pred_rgb* 255).astype('uint8'))
-    # cv2.waitKey(0)
-    # print(pred_rgb)
-    #nois_rgb = cv2.cvtColor(transformed_noisy.squeeze(0).permute(1, 2, 0).numpy(), cv2.COLOR_BGR2RGB)
-    # predicted_name = noisy_path.split('/')[-2] + '_' + noisy_path.split('/')[-1]# + '_pred.PNG'
-    # cv2.imwrite('PycharmProjects/Data/presentation/pred/' + predicted_name, (pred_rgb* 255))
-
     if show:
-        nois_rgb = cv2.cvtColor(transformed_noisy.squeeze(0).permute(1,2,0).numpy(),cv2.COLOR_BGR2RGB)
-        pred_rgb = cv2.cvtColor(predicted_image,cv2.COLOR_BGR2RGB)
-        cv2.imshow("noisy image",nois_rgb)
-        cv2.imshow("predicted image", pred_rgb)
+        cv2.imshow("noisy image", transformed_noisy.squeeze(0).permute(1,2,0).numpy())
+        cv2.imshow("predicted image", predicted_image)
         if gt_path != None:
             cv2.imshow("gt image", gt_image)
-        # noisy_name = noisy_path.split('/')[-2] + '_' + noisy_path.split('/')[-1]
-        # print(noisy_name)
-        # predicted_name = noisy_name.replace('NOISY','PRD')
-        # gt_name = noisy_name.replace('NOISY','GT')
-        # print(?noisy_name)
-        # cv2.imwrite('../../output_results/'+predicted_name,(predicted_image*255).astype('uint8'))
-        # cv2.imwrite('../../output_results/'+noisy_name,(transformed_noisy.squeeze(0).permute(1,2,0).numpy()*255).astype('uint8'))
-        # # cv2.imwrite('../../output_results/'+gt_name,(gt_image*255).astype('uint8'))
-        # cv2.waitKey(0)
-    # nois_rgb = cv2.cvtColor(transformed_noisy.squeeze(0).permute(1, 2, 0).numpy(), cv2.COLOR_BGR2RGB)
-    # pred_rgb = cv2.cvtColor(predicted_image, cv2.COLOR_BGR2RGB)
-    # predicted_name = noisy_path.split('/')[-2] + '_' + noisy_path.split('/')[-1] +'_pred.PNG'
-    # cv2.imwrite('PycharmProjects/Data/presentation/pred/' + predicted_name, pred_rgb)
-#(predicted_image * 255).astype('uint8')
+        cv2.waitKey(0)
+
     return psnr_val, ssim_val
+#
+# def test_image(gt_path, noisy_path, model_path, transform, show = True, psnr = True, ssim = True):
+#     # model load
+#     model = ridnet.RIDNET(args)
+#     model.load_state_dict(torch.load(model_path))
+#     model.eval()
+#
+#     # open noisy image
+#     gt_image = cv2.imread(gt_path)
+#     print(type(gt_image))
+#     try :
+#         # noisy_image = PIL.Image.open(noisy_path)
+#         noisy_image = cv2.imread(noisy_path)
+#         print(type(noisy_image))
+#         # print("nois")
+#         if not gt_path is None:
+#             print("inside gt_path loading")
+#             print(gt_path)
+#             # .numpy()
+#
+#             # print(type(gt_image)+"how you doiun")
+#     except :
+#         print("no no no no")
+#         # noisy_image = noisy_path
+#         gt_image = gt_path
+#     state = torch.get_rng_state()
+#
+#     # cv2.imshow("0",noisy_image)
+#     # cv2.waitKey()
+#
+#     transformed_noisy = transform(noisy_image)
+#
+#     # print(type(transformed_noisy))
+#     torch.set_rng_state(state)
+#     if gt_path is None:
+#         print("no no no no")
+#         gt_image = transform(gt_image).numpy() #.permute(1,2,0)(image recieved is rgb in testset
+#
+#
+#     print("no show")
+#     transformed_noisy = transformed_noisy.unsqueeze(0)
+#
+#     predicted_image = pass_though_net(model,transformed_noisy)
+#
+#     #at this point this is np
+#
+#     #print(gt_image.shape)
+#     #print(predicted_image.shape)
+#
+#     # loss = nn.L1Loss()
+#     # print(loss(gt_image,predicted_image))
+#     psnr_val =0
+#     if psnr and not gt_path is None:
+#        psnr_val = PSNR(predicted_image, gt_image)
+#        print("PSNR is: ",psnr_val)
+#     ssim_val = 0
+#     if ssim and not gt_path is None:
+#         ssim_val = calc_ssim(predicted_image,gt_image)
+#         print("SSIM is: ",ssim_val)
+#     # pred_rgb = cv2.cvtColor(predicted_image, cv2.COLOR_BGR2RGB)
+#
+#     # cv2.imshow("predicted image", (pred_rgb* 255).astype('uint8'))
+#     # cv2.waitKey(0)
+#     # print(pred_rgb)
+#     #nois_rgb = cv2.cvtColor(transformed_noisy.squeeze(0).permute(1, 2, 0).numpy(), cv2.COLOR_BGR2RGB)
+#     # predicted_name = noisy_path.split('/')[-2] + '_' + noisy_path.split('/')[-1]# + '_pred.PNG'
+#     # cv2.imwrite('PycharmProjects/Data/presentation/pred/' + predicted_name, (pred_rgb* 255))
+#
+#     if show:
+#         nois_rgb = cv2.cvtColor(transformed_noisy.squeeze(0).permute(1,2,0).numpy(),cv2.COLOR_BGR2RGB)
+#         pred_rgb = cv2.cvtColor(predicted_image,cv2.COLOR_BGR2RGB)
+#         cv2.imshow("noisy image",nois_rgb)
+#         cv2.imshow("predicted image", pred_rgb)
+#         if gt_path != None:
+#             cv2.imshow("gt image", gt_image)
+#         # noisy_name = noisy_path.split('/')[-2] + '_' + noisy_path.split('/')[-1]
+#         # print(noisy_name)
+#         # predicted_name = noisy_name.replace('NOISY','PRD')
+#         # gt_name = noisy_name.replace('NOISY','GT')
+#         # print(?noisy_name)
+#         # cv2.imwrite('../../output_results/'+predicted_name,(predicted_image*255).astype('uint8'))
+#         # cv2.imwrite('../../output_results/'+noisy_name,(transformed_noisy.squeeze(0).permute(1,2,0).numpy()*255).astype('uint8'))
+#         # # cv2.imwrite('../../output_results/'+gt_name,(gt_image*255).astype('uint8'))
+#         # cv2.waitKey(0)
+#     # nois_rgb = cv2.cvtColor(transformed_noisy.squeeze(0).permute(1, 2, 0).numpy(), cv2.COLOR_BGR2RGB)
+#     # pred_rgb = cv2.cvtColor(predicted_image, cv2.COLOR_BGR2RGB)
+#     # predicted_name = noisy_path.split('/')[-2] + '_' + noisy_path.split('/')[-1] +'_pred.PNG'
+#     # cv2.imwrite('PycharmProjects/Data/presentation/pred/' + predicted_name, pred_rgb)
+# #(predicted_image * 255).astype('uint8')
+#     return psnr_val, ssim_val
 
 def make_DB_of_mat(mat_location,path_to_save):
     mat = loadmat(mat_location)
@@ -153,9 +216,10 @@ def test_on_test_set(path_to_test_gt,path_to_test_noisy,model_path,func,transfor
     count = 0
     for i in range(len(os.listdir(path_to_test_gt))):
         for j in range(len(os.listdir(path_to_test_gt+'img_'+str(i)))):
-            path_to_gt_im = path_to_test_gt+'img_'+str(i)+'/block_'+str(j)+'.png'
-            path_to_noisy_im = path_to_test_noisy+'img_'+str(i)+'/block_'+str(j)+'.png'
-            im_psnr, im_ssim = func(path_to_gt_im, path_to_noisy_im, model_path, transform, show = False, psnr = False, ssim = False)
+            j=j+3
+            path_to_gt_im = path_to_test_gt+'img_'+str(i)+'/block_'+str(i)+'_'+str(j)+'.png'
+            path_to_noisy_im = path_to_test_noisy+'img_'+str(i)+'/block_'+str(i)+'_'+str(j)+'.png'
+            im_psnr, im_ssim = func(path_to_gt_im, path_to_noisy_im, model_path, transform, show = False, psnr = True, ssim = True)
             print("psnr is: " + str(im_psnr) + "and im ssim is: " + str(im_ssim))
             break
         break
@@ -192,11 +256,11 @@ def main():
 
     # make_DB_of_mat('../mats/ValidationNoisyBlocksSrgb.mat','../test_set/noisy/')
     transform = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.RandomHorizontalFlip(),
-        SIDD_Dataset.rotate_by_90_mul([0, 90, 180, 270])
+        transforms.ToTensor()
+        # transforms.RandomHorizontalFlip()
+        # SIDD_Dataset.rotate_by_90_mul([0, 90, 180, 270])
     ])
-    test_on_test_set('../test_set/gt/','../test_set/noisy/','../models/LabLoss_6921_l1.pt',test_image,transform)
+    test_on_test_set('../test_set/gt/','../test_set/noisy/','../models/res_model1.pt',test_image,transform)
     # test_image('../test_set/gt/','../test_set/noisy/','../models/LabLoss_6921_l1.pt',transform,show=False,psnr=False,ssim=False)
     return 0
     noisy_path = 'PycharmProjects/Data/presentation/ISO_3200_C_2_cr.png'#'../test/0046_002_G4_00400_00350_3200_L/0046_NOISY_SRGB_010.PNG'
