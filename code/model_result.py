@@ -23,6 +23,8 @@ from scipy.io import loadmat
 from skimage.metrics import structural_similarity as ssim
 import random
 from math import log10,sqrt
+import kornia
+import logging
 
 
 
@@ -40,6 +42,33 @@ from math import log10,sqrt
 #noisy_image=trans1(noisy_image)
 # torch.set_rng_state(state)
 # gt_image = transform(gt_image)
+
+def compare_save_images(gt_image, noisy_image,image_path,models,models_names,image_name,transform):
+
+    noisy_image_write = noisy_image.detach().permute(1, 2, 0).numpy()
+    # cv2.imwrite(image_path + 'noisy.png', (noisy_image_write * 255))
+    noisy_transformed_image = noisy_image.unsqueeze(0)
+    logging.basicConfig(filename = "./../logs/"+image_name+".log", level=logging.INFO)
+    gt_image = gt_image.detach().permute(1,2,0).numpy()
+    for i,model in enumerate(models):
+        pred_image1 = pass_though_net(model,noisy_transformed_image)
+        # pred_image2 = pass_though_net(model2,noisy_transformed_image)
+
+        cv2.imwrite(image_path+models_names[i]+'.png',pred_image1*255)
+        print(type(gt_image))
+        print(type(pred_image1))
+        # psnr =
+        print("psnr for "+ models_names[i]+" image is " + str(PSNR(pred_image1,gt_image)) + " ssim is:" + str(calc_ssim(pred_image1,gt_image)))
+        logging.info("psnr for "+ models_names[i]+" image is " + str(PSNR(pred_image1,gt_image))+ " ssim is: " + str(calc_ssim(pred_image1,gt_image)))
+
+    # cv2.imwrite(image_path+'Contentloss_model.png',pred_image2*255)
+
+
+    # print("psnr for content loss image is" + str(PSNR(pred_image2,gt_image))+ "ssim is:" + str(calc_ssim(pred_image2,gt_image)))
+    # cv2.imwrite(image_path+'gt.png',(gt_image*255))
+    # print("PSNR is: "+PSNR(gt_image,pred_image))
+
+
 def pass_though_net(model, noisy_img):
 
     pred_img = model(noisy_img)
@@ -65,7 +94,6 @@ def test_image(gt_path, noisy_path, model_path, transform, show = True, psnr = T
     model = ridnet.RIDNET(args)
     model.load_state_dict(torch.load(model_path))
     model.eval()
-
     # open noisy image
     try :
         noisy_image = PIL.Image.open(noisy_path)
@@ -224,9 +252,26 @@ def test_on_test_set(path_to_test_gt,path_to_test_noisy,model_path,func,transfor
             break
         break
 
+def create_cropped_images(gt_image,noisy_image,transform):
 
 
 
+    state = torch.get_rng_state()
+    cropped_GT_image = transform(gt_image)
+    torch.set_rng_state(state)
+    cropped_NOISY_image = transform(noisy_image)
+    return cropped_GT_image,cropped_NOISY_image
+
+def load_im(folder_path,transform):
+    gt_im = Image.open(folder_path+"gt.png")
+    noisy_im = Image.open(folder_path+"noisy.png")
+
+    return transform(gt_im),transform(noisy_im)
+
+
+def bgr2rgb(im):
+    im = cv2.cvtColor(im,cv2.COLOR_BGR2RGB)
+    return im
 
 # N_mat_path = '../test/ValidationNoisyBlocksSrgb.mat'
 # gt_mat_path = '../test/ValidationGtBlocksSrgb.mat'
@@ -255,12 +300,86 @@ def main():
     # num_img, num_blocks, _, _, _ = nam_mat['ValidationNoisyBlocksSrgb'].shape
 
     # make_DB_of_mat('../mats/ValidationNoisyBlocksSrgb.mat','../test_set/noisy/')
+
+
+    image = cv2.imread('../test_im/165/gt.png')
+    image1 = bgr2rgb(image)
+    cv2.imwrite('../test_im/165/gt1.png',image1)
+    return 0
+
+    gt_im = cv2.imread('./Patches/0035_002_GP_00800_00350_3200_N/GT_22_22_010.PNG')
+    gt_im = cv2.imread('../../../Data/SIDD_medium/SSID_medium/SIDD_Medium_Srgb/Data/0165_007_IP_00800_00800_3200_N/0165_GT_SRGB_011.PNG')
+    # cv2.imshow("im",gt_im)
+    # cv2.waitKey()
+    # gt_im = cv2.cvtColor(gt_im,cv2.COLOR_BGR2RGB)
+    noisy_im = cv2.imread('../../../Data/SIDD_medium/SSID_medium/SIDD_Medium_Srgb/Data/0165_007_IP_00800_00800_3200_N/0165_NOISY_SRGB_011.PNG')
+
+    model1 = ridnet.RIDNET(args)
+    model1_path = '../models/L1_128p_171021.pt'
+    model1.load_state_dict(torch.load(model1_path))
+    model1.eval()
+
+    model2 = ridnet.RIDNET(args)
+    model2_path = '../models/LabL1_128p_111021.pt'
+    model2.load_state_dict(torch.load(model2_path))
+    model2.eval()
+
+    model3 = ridnet.RIDNET(args)
+    model3_path = '../models/25621_l1.pt'
+    model3.load_state_dict(torch.load(model3_path))
+    model3.eval()
+
+    model4 = ridnet.RIDNET(args)
+    model4_path = '../models/LabLoss_17921_l2.pt'
+    model4.load_state_dict(torch.load(model4_path))
+    model4.eval()
+
+    model5 = ridnet.RIDNET(args)
+    model5_path = '../models/lpips_41021.pt'
+    model5.load_state_dict(torch.load(model5_path))
+    model5.eval()
+
+    model6 = ridnet.RIDNET(args)
+    model6_path = '../models/27621_l2.pt'
+    model6.load_state_dict(torch.load(model6_path))
+    model6.eval()
+
+    model7 = ridnet.RIDNET(args)
+    model7_path = '../models/ContentLoss_Lab_27921_l2.pt'
+    model7.load_state_dict(torch.load(model7_path))
+    model7.eval()
+
+    model8 = ridnet.RIDNET(args)
+    model8_path = '../models/LabLoss_13921_l1.pt'
+    model8.load_state_dict(torch.load(model8_path))
+    model8.eval()
+
+    models = [model1,model2,model3,model4,model5,model6,model7,model8]
+    models_names = ["L1_128","L1Lab_128","L1","LabL2","LPIPS","L2","ContentLossLab","LabL1"]
+    transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.RandomCrop(1000)
+        # transforms.RandomHorizontalFlip()
+        # SIDD_Dataset.rotate_by_90_mul([0, 90, 180, 270])
+    ])
+
+    # gt_im,noisy_im = create_cropped_images(gt_im,noisy_im,transform)
+    gt_im,noisy_im = load_im("../test_im/"+"17/",transform)
+    compare_save_images(gt_im,noisy_im,'../test_im/17/',models,models_names,"17",transform)
+
+    gt_im, noisy_im = load_im("../test_im/" + "60/", transform)
+    compare_save_images(gt_im, noisy_im, '../test_im/60/', models, models_names, "60", transform)
+
+    gt_im, noisy_im = load_im("../test_im/" + "165/", transform)
+    compare_save_images(gt_im, noisy_im, '../test_im/165/', models, models_names, "165", transform)
+    return 0
     transform = transforms.Compose([
         transforms.ToTensor()
         # transforms.RandomHorizontalFlip()
         # SIDD_Dataset.rotate_by_90_mul([0, 90, 180, 270])
     ])
     test_on_test_set('../test_set/gt/','../test_set/noisy/','../models/res_model1.pt',test_image,transform)
+    test_on_test_set()
     # test_image('../test_set/gt/','../test_set/noisy/','../models/LabLoss_6921_l1.pt',transform,show=False,psnr=False,ssim=False)
     return 0
     noisy_path = 'PycharmProjects/Data/presentation/ISO_3200_C_2_cr.png'#'../test/0046_002_G4_00400_00350_3200_L/0046_NOISY_SRGB_010.PNG'

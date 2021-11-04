@@ -8,7 +8,7 @@ from functools import reduce
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-
+import kornia
 import numpy as np
 import scipy.misc as misc
 
@@ -16,6 +16,44 @@ import torch
 import torch.optim as optim
 import torch.optim.lr_scheduler as lrs
 from torch.autograd import Variable
+from vgg16 import Vgg16
+import lpips
+
+
+def rgb2Ycrcb(input):
+    input = input.cuda().reshape(3,-1)
+
+    Y_vector = Variable(torch.FloatTensor([0.299, 0.587, 0.114]),requires_grad=False).cuda().reshape(1,3)
+    output = torch.matmul(Y_vector, input).cuda()
+    return output
+
+def Yloss(pred_batch,gt_batch):
+    batch = pred_batch.shape
+    # batch_loss = torch.empty(size = batch)
+    lab_batch_pred = torch.empty(size=(batch[0],batch[2]*batch[3]))
+    lab_batch_gt = torch.empty(size=(batch[0],batch[2]*batch[3]))
+    for i in range(batch[0]):
+        lab_batch_pred[i] = rgb2Ycrcb(pred_batch[i, :, :, :])
+        lab_batch_gt[i] = rgb2Ycrcb(gt_batch[i, :, :, :])
+
+
+
+    # lab_batch_pred = kornia.color.rgb_to_lab(pred_batch)
+    # lab_batch_gt = kornia.color.rgb_to_lab(gt_batch)
+
+    loss = torch.abs(lab_batch_pred - lab_batch_gt)
+    return loss.mean()
+
+
+class Y_L1(torch.nn.Module):
+    def __init__(self):
+        super(Y_L1,self).__init__()
+        self.loss = torch.nn.L1Loss()
+        self.alpha = 0.5
+    def forward(self,pred,gt):
+        Y_loss = Yloss(pred,gt)
+        L1 = self.loss(pred,gt)
+        return (self.alpha*Y_loss)+((1-self.alpha)*L1)
 
 
 def xyz2lab(xyz):
@@ -70,6 +108,35 @@ def rgb2xyz(rgb): # rgb from [0,1]
 def rgb2lab(rgb):
     return xyz2lab(rgb2xyz(rgb))
 
+def normalize_batch(batch):
+    # normalize using imagenet mean and std
+    mean = batch.new_tensor([0.485, 0.456, 0.406]).view(-1, 1, 1)
+    std = batch.new_tensor([0.229, 0.224, 0.225]).view(-1, 1, 1)
+    batch = batch.div_(255.0)
+    return (batch - mean) / std
+
+class content_lab_loss(torch.nn.Module):
+    def __init__(self):
+        super(content_lab_loss,self).__init__()
+        self.model=Vgg16(requires_grad=False)
+        self.loss = torch.nn.MSELoss()
+        self.alpha = 1
+    def forward(self,pred,gt):
+        ContentLoss_Val = content_loss(self.model,self.loss,pred,gt)
+        LabLoss_Val = LabLoss_L2(pred,gt)
+        return (self.alpha*ContentLoss_Val)+((1-self.alpha)*LabLoss_Val)
+
+
+def content_loss(model, loss_function, pred_batch, gt_batch):
+    gt_features = model(gt_batch).relu2_2
+    pred_features = model(pred_batch).relu2_2
+    # print(str(gt_features.shape) + "type of gt featues and val")
+    return loss_function(pred_features,gt_features)
+
+def lpips_func():
+
+    return lpips.LPIPS(net='vgg')
+
 
 def LabLoss_L1 (pred_batch, gt_batch):
     batch = pred_batch.shape
@@ -79,9 +146,26 @@ def LabLoss_L1 (pred_batch, gt_batch):
     for i in range(batch[0]):
         lab_batch_pred[i] = rgb_to_lab(pred_batch[i,:,:,:])
         lab_batch_gt[i] = rgb_to_lab(gt_batch[i,:,:,:])
-        
+
+    # lab_batch_pred = kornia.color.rgb_to_lab(pred_batch)
+    # lab_batch_gt = kornia.color.rgb_to_lab(gt_batch)
+
     loss = torch.abs(lab_batch_pred-lab_batch_gt)
     return loss.mean()
+
+def LabLoss_L2 (pred_batch, gt_batch):
+    # lab_batch_pred = kornia.color.rgb_to_lab(pred_batch)
+    # lab_batch_gt = kornia.color.rgb_to_lab(gt_batch)
+    batch = pred_batch.shape
+    # batch_loss = torch.empty(size = batch)
+    lab_batch_pred = torch.empty(size = batch)
+    lab_batch_gt = torch.empty(size = batch)
+    for i in range(batch[0]):
+        lab_batch_pred[i] = rgb_to_lab(pred_batch[i,:,:,:])
+        lab_batch_gt[i] = rgb_to_lab(gt_batch[i,:,:,:])
+
+
+    return torch.mean((lab_batch_gt - lab_batch_pred) ** 2)
 
 
 

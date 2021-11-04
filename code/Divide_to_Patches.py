@@ -5,13 +5,13 @@ import torch
 import torchvision
 import csv
 
-small_patch_size = 80
+small_patch_size = 128
 
 print(os.getcwd())
 
-path_to_data = '../../../PycharmProjects/Data/SIDD_medium/SIDD_medium/SIDD_Medium_Srgb/Data/'
+path_to_data = '../../../Data/SIDD_medium/SSID_medium/SIDD_Medium_Srgb/Data/'
 
-path_to_patches = "../../../PycharmProjects/Data/SIDD_medium/Patches/"
+path_to_patches = '../patches_128/'
 csv_path = path_to_patches + "image_csv.csv"
 
 with open(csv_path, "w") as csv_in:
@@ -31,13 +31,13 @@ with open(csv_path, "w") as csv_in:
             img = Image.open(path_to_data+f+"/"+im)
             width = img.size[0]
             height = img.size[1]
+            w_offset = small_patch_size
+            h_offset = small_patch_size
+            for i in range(int(width/small_patch_size)):
+                for j in range(int(height/small_patch_size)):
 
-            for i in range(40):
-                for j in range(30):
-                    w_offset = ((width/40)-small_patch_size)/2
-                    h_offset = ((height/30)-small_patch_size)/2
-                    small_patch = img.crop(((small_patch_size * i)+w_offset, (small_patch_size * j) + h_offset, small_patch_size * (i + 1)+w_offset,
-                                            small_patch_size * (j + 1)+h_offset))
+                    small_patch = img.crop(((small_patch_size * i), (small_patch_size * j) , (small_patch_size * i)+w_offset,
+                                            (small_patch_size * j) +h_offset))
                     patch_path = im_dir_path+"/"+im_type+"_"+str(i)+"_"+str(j)+"_"+name
                     small_patch.save(patch_path+".PNG")
                     if im_type == "GT":

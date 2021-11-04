@@ -7,25 +7,28 @@ import torch.nn as nn
 import torch
 from torch.autograd import Variable
 from tqdm import tqdm
+import logging
 
 
 class Trainer():
-    def __init__(self, args, test_loader,train_loader, my_model, my_loss, ckp):
+    def __init__(self, args, val_loader,train_loader, my_model, my_loss, ckp,save_path):
         self.args = args
 
         self.ckp = ckp
         self.train_loader = train_loader
-        self.test_loader = test_loader
+        self.val_loader = val_loader
         self.model = my_model
         self.loss = my_loss
-        self.optimizer = torch.optim.Adam(self.model.parameters(),lr=args.lr)
+        self.optimizer = torch.optim.Adam(self.model.parameters(),lr=1e-4)
         # self.scheduler = utility.make_scheduler(args,self.optimizer)
-        self.scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer,1,args.gamma)
+        self.scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer,5000,0.6)
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         print(self.device)
-        self.path = args.model_path
-        self.epochs = args.epochs
+        self.path = save_path
+        self.epochs = 3
+        self.val_loss = 1000000
         print(self.path)
+        logging.basicConfig(filename = "./../logs/"+ self.path.split('.pt')[0]+"_train.log", level=logging.INFO)
 
         # if self.args.load != '.':
         #     self.optimizer.load_state_dict(
@@ -36,22 +39,22 @@ class Trainer():
         self.error_last = 1e8
 
     def train(self):
-        self.model.train()
         for epoch in range(self.epochs):
             timer_data, timer_model = utility.timer(), utility.timer()
             running_loss = 0
-            # self.ckp.write_log(
-                # '[Epoch {}]\tLearning rate: {:.2e}'.format(epoch, Decimal(lr)))
+            self.model.train()
+
             for batch, data in enumerate(self.train_loader):
+
                 gt_image = data['GT_image']
                 noisy_image = data['NOISY_image']
                 name = data['image_name']
                 self.optimizer.zero_grad()
 
-                # plt.imshow(lr.permute(1,2,0))
                 timer_data.hold()
                 timer_model.tic()
                 pred_image = self.model(noisy_image)
+
                 loss = self.loss(pred_image, gt_image)
                 # if loss.item() < self.args.skip_threshold * self.error_last:
                 loss.backward()
@@ -62,10 +65,32 @@ class Trainer():
                 #     ))
                 running_loss += loss.item()*gt_image.size(0)
                 timer_model.hold()
-                if batch % 500 == 0:
+                self.scheduler.step()
+
+                if (batch % 1000 == 0) and batch != 0 :
+                    self.model.eval()
+                    current_loss = 0
+                    with torch.no_grad():
+                        for val_batch, data in enumerate(self.val_loader):
+                            gt_image = data['GT_image']
+                            noisy_image = data['NOISY_image']
+                            name = data['image_name']
+                            val_pred  = self.model(noisy_image)
+
+                            current_loss += self.loss(val_pred, gt_image).item()*gt_image.size(0)
+                        self.model.train()
+
+                        print("Val_Loss is: ", current_loss)
+
+                        if current_loss<self.val_loss:
+                            self.val_loss = current_loss
+                            torch.save(self.model.state_dict(), self.path)
+                            print("resaved")
+
                     print("Loss on batch: ", batch, " is: ", loss.item())
 
-
+                if (batch % 100 == 0):
+                    logging.info(str(batch)+" loss: " + str(running_loss))
             self.ckp.write_log('[{}/{}]\t{}\t{:.1f}+{:.1f}s'.format(
                 (epoch + 1) ,
                 len(self.train_loader.dataset),
@@ -74,8 +99,9 @@ class Trainer():
                 timer_data.release()))
 
             timer_data.tic()
-            self.scheduler.step()
-        torch.save(self.model.state_dict(), self.path)
+        path_split = self.path.split('.pt')
+        torch.save(self.model.state_dict(), path_split[0]+"_final.pt")
+
 
 def test(self):
 
