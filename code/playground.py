@@ -69,8 +69,8 @@ model = ridnet.RIDNET(args)
 # print(lab_dog)
 # loss = nn.MSELoss()
 # LabLoss = utility.LabLoss
-loss = mssim.msssim
-t = Trainer(args, validation_dataloders,train_dataloders, model, loss, utility.checkpoint(args), model_path+'mssim_41121.pt')
+loss = utility.msssim_L1
+t = Trainer(args, validation_dataloders,train_dataloders, model, loss, utility.checkpoint(args), model_path+'msssim_L1_91121.pt')
 t.train()
 
 

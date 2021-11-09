@@ -40,16 +40,16 @@ gt_mat = loadmat(gt_mat_path)
 
 num_img, num_blocks, _ , _ , _ = n_mat['ValidationNoisyBlocksSrgb'].shape
 
-for i in range(num_img):
-    cv2.imwrite("../test_images/Noisy_test_im"+str(i)+".png",n_mat['ValidationNoisyBlocksSrgb'][i])
-    cv2.imwrite("../test_images/GT_test_im"+str(i)+".png",gt_mat['ValidationGtBlocksSrgb'][i])
-
-print("Done")
+# for i in range(num_img):
+#     cv2.imwrite("../test_images/Noisy_test_im"+str(i)+".png",n_mat['ValidationNoisyBlocksSrgb'][i])
+#     cv2.imwrite("../test_images/GT_test_im"+str(i)+".png",gt_mat['ValidationGtBlocksSrgb'][i])
+#
+# print("Done")
 
 num_samples = num_img*num_blocks
 
 model = ridnet.RIDNET(args)
-model_path = '../models/lpips_41021.pt'
+model_path = '../models/LabL1_128p_191021_final.pt'
 
 model.load_state_dict(torch.load(model_path))
 model.eval()
@@ -83,7 +83,6 @@ for i in range(num_img):
 print("Average PSNR is: ", total_psnr/num_samples)
 print("Average SSIM is: ", total_ssim/num_samples)
 # cv2.imshow("pred_img", pred_img)
-
 
 
 

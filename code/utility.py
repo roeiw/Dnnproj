@@ -18,6 +18,13 @@ import torch.optim.lr_scheduler as lrs
 from torch.autograd import Variable
 from vgg16 import Vgg16
 import lpips
+from pytorch_msssim import ms_ssim
+
+
+
+def msssim(pred_batch,gt_batch):
+    ms_ssim_loss = 1-ms_ssim(pred_batch,gt_batch,data_range=1,win_size=7)
+    return ms_ssim_loss
 
 
 def rgb2Ycrcb(input):
@@ -137,6 +144,10 @@ def lpips_func():
 
     return lpips.LPIPS(net='vgg')
 
+def msssim_L1(pred_batch, gt_batch):
+    msssim_loss = msssim(pred_batch,gt_batch)
+    L1_loss = torch.abs(pred_batch-gt_batch).mean()
+    return 0.5*(msssim_loss+L1_loss)
 
 def LabLoss_L1 (pred_batch, gt_batch):
     batch = pred_batch.shape

@@ -65,6 +65,8 @@ model_path = '../models/LabL1_128p_191021_final.pt'
 
 model.load_state_dict(torch.load(model_path))
 model.eval()
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+model.to(device)
 
 total_ssim =0
 total_psnr =0
@@ -92,8 +94,8 @@ for path,subdirs,mats in os.walk(N_mat_path):
         for i in range(0,H,int(H/8)):
             for j in range(0,W,int(W/8)):
                 num_mats += 1
-                cropped_gt = gt_mat[i:i+int(H/4),j:j+int(W/4),:]
-                cropped_noisy = noisy_mat[i:i+int(H/4),j:j+int(W/4),:]
+                cropped_gt = gt_mat[i:i+int(H/8),j:j+int(W/8),:]
+                cropped_noisy = noisy_mat[i:i+int(H/8),j:j+int(W/8),:]
                 print("before test image")
                 psnr,ssim = model_result.test_image(cropped_gt,cropped_noisy,model_path,totensor,show=False)
                 print("after test img")

@@ -302,17 +302,17 @@ def main():
     # make_DB_of_mat('../mats/ValidationNoisyBlocksSrgb.mat','../test_set/noisy/')
 
 
-    image = cv2.imread('../test_im/165/gt.png')
-    image1 = bgr2rgb(image)
-    cv2.imwrite('../test_im/165/gt1.png',image1)
-    return 0
+    # image = cv2.imread('../test_im/165/gt.png')
+    # image1 = bgr2rgb(image)
+    # cv2.imwrite('../test_im/165/gt1.png',image1)
+    # return 0
 
-    gt_im = cv2.imread('./Patches/0035_002_GP_00800_00350_3200_N/GT_22_22_010.PNG')
-    gt_im = cv2.imread('../../../Data/SIDD_medium/SSID_medium/SIDD_Medium_Srgb/Data/0165_007_IP_00800_00800_3200_N/0165_GT_SRGB_011.PNG')
-    # cv2.imshow("im",gt_im)
-    # cv2.waitKey()
-    # gt_im = cv2.cvtColor(gt_im,cv2.COLOR_BGR2RGB)
-    noisy_im = cv2.imread('../../../Data/SIDD_medium/SSID_medium/SIDD_Medium_Srgb/Data/0165_007_IP_00800_00800_3200_N/0165_NOISY_SRGB_011.PNG')
+    # gt_im = cv2.imread('./Patches/0035_002_GP_00800_00350_3200_N/GT_22_22_010.PNG')
+    # gt_im = cv2.imread('../../../Data/SIDD_medium/SSID_medium/SIDD_Medium_Srgb/Data/0165_007_IP_00800_00800_3200_N/0165_GT_SRGB_011.PNG')
+    # # cv2.imshow("im",gt_im)
+    # # cv2.waitKey()
+    # # gt_im = cv2.cvtColor(gt_im,cv2.COLOR_BGR2RGB)
+    # noisy_im = cv2.imread('../../../Data/SIDD_medium/SSID_medium/SIDD_Medium_Srgb/Data/0165_007_IP_00800_00800_3200_N/0165_NOISY_SRGB_011.PNG')
 
     model1 = ridnet.RIDNET(args)
     model1_path = '../models/L1_128p_171021.pt'
@@ -335,7 +335,7 @@ def main():
     model4.eval()
 
     model5 = ridnet.RIDNET(args)
-    model5_path = '../models/lpips_41021.pt'
+    model5_path = '../models/LabLoss_13921_l1.pt'
     model5.load_state_dict(torch.load(model5_path))
     model5.eval()
 
@@ -350,15 +350,20 @@ def main():
     model7.eval()
 
     model8 = ridnet.RIDNET(args)
-    model8_path = '../models/LabLoss_13921_l1.pt'
+    model8_path = '../models/Y_L1_241021_final.pt'
     model8.load_state_dict(torch.load(model8_path))
     model8.eval()
 
-    models = [model1,model2,model3,model4,model5,model6,model7,model8]
-    models_names = ["L1_128","L1Lab_128","L1","LabL2","LPIPS","L2","ContentLossLab","LabL1"]
+    model9 = ridnet.RIDNET(args)
+    model9_path = '../models/mssim_61121.pt'
+    model9.load_state_dict(torch.load(model9_path))
+    model9.eval()
+
+    models = [model1,model2,model3,model4,model5,model6,model7,model8,model9]
+    models_names = ["L1_128","L1Lab_128","L1","LabL2","LabL1","L2","ContentLossLab","Y_L1","msssim"]
     transform = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.RandomCrop(1000)
+        transforms.ToTensor()
+        # transforms.RandomCrop(1000)
         # transforms.RandomHorizontalFlip()
         # SIDD_Dataset.rotate_by_90_mul([0, 90, 180, 270])
     ])
