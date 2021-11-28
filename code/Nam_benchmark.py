@@ -23,6 +23,8 @@ from scipy.io import loadmat
 from skimage.metrics import structural_similarity as ssim
 import random
 import model_result
+from tqdm import tqdm
+
 
 
 
@@ -61,7 +63,7 @@ totensor = transforms.ToTensor()
 
 
 model = ridnet.RIDNET(args)
-model_path = '../models/LabL1_128p_191021_final.pt'
+model_path = '../models/25621_l1.pt'
 
 model.load_state_dict(torch.load(model_path))
 model.eval()
@@ -83,22 +85,20 @@ total_psnr =0
 num_mats = 0
 for path,subdirs,mats in os.walk(N_mat_path):
 
-    print(mats)
-    for mat in mats:
+    # print(mats)
+    for mat in tqdm(mats):
         temp_m = loadmat(os.path.join(path,mat))
-        print(temp_m.keys())
+        # print(temp_m.keys())
         noisy_mat = temp_m['img_noisy']
         gt_mat = temp_m['img_mean']
         H,W,_ = noisy_mat.shape
-        print(type(noisy_mat))
+        # print(type(noisy_mat))
         for i in range(0,H,int(H/8)):
             for j in range(0,W,int(W/8)):
                 num_mats += 1
                 cropped_gt = gt_mat[i:i+int(H/8),j:j+int(W/8),:]
                 cropped_noisy = noisy_mat[i:i+int(H/8),j:j+int(W/8),:]
-                print("before test image")
                 psnr,ssim = model_result.test_image(cropped_gt,cropped_noisy,model_path,totensor,show=False)
-                print("after test img")
                 total_ssim += ssim
                 total_psnr += psnr
 print("psnr is: " + str(total_psnr / num_mats))

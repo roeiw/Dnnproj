@@ -9446,3 +9446,445 @@ save_results: False
 testpath: ../../data
 testset: Set5
 
+2021-11-17-17:20:41
+
+debug: False
+template: .
+dir_data: ../../data
+dir_demo: ../test
+rgb_range: 255
+n_feats: 64
+reset: False
+test_every: 1000
+epochs: 3
+batch_size: 16
+test_only: False
+lr: 0.0001
+gamma: 0.5
+loss: L1
+save: test
+load: .
+resume: 0
+print_model: False
+save_models: False
+print_every: 100
+save_results: False
+testpath: ../../data
+testset: Set5
+
+2021-11-17-17:22:39
+
+debug: False
+template: .
+dir_data: ../../data
+dir_demo: ../test
+rgb_range: 255
+n_feats: 64
+reset: False
+test_every: 1000
+epochs: 3
+batch_size: 16
+test_only: False
+lr: 0.0001
+gamma: 0.5
+loss: L1
+save: test
+load: .
+resume: 0
+print_model: False
+save_models: False
+print_every: 100
+save_results: False
+testpath: ../../data
+testset: Set5
+
+2021-11-21-11:43:32
+
+debug: False
+template: .
+dir_data: ../../data
+dir_demo: ../test
+rgb_range: 255
+n_feats: 64
+reset: False
+test_every: 1000
+epochs: 3
+batch_size: 16
+test_only: False
+lr: 0.0001
+gamma: 0.5
+loss: L1
+save: test
+load: .
+resume: 0
+print_model: False
+save_models: False
+print_every: 100
+save_results: False
+testpath: ../../data
+testset: Set5
+
+2021-11-21-16:37:58
+
+debug: False
+template: .
+dir_data: ../../data
+dir_demo: ../test
+rgb_range: 255
+n_feats: 64
+reset: False
+test_every: 1000
+epochs: 3
+batch_size: 16
+test_only: False
+lr: 0.0001
+gamma: 0.5
+loss: L1
+save: test
+load: .
+resume: 0
+print_model: False
+save_models: False
+print_every: 100
+save_results: False
+testpath: ../../data
+testset: Set5
+
+2021-11-21-16:38:10
+
+debug: False
+template: .
+dir_data: ../../data
+dir_demo: ../test
+rgb_range: 255
+n_feats: 64
+reset: False
+test_every: 1000
+epochs: 3
+batch_size: 16
+test_only: False
+lr: 0.0001
+gamma: 0.5
+loss: L1
+save: test
+load: .
+resume: 0
+print_model: False
+save_models: False
+print_every: 100
+save_results: False
+testpath: ../../data
+testset: Set5
+
+2021-11-21-16:40:16
+
+debug: False
+template: .
+dir_data: ../../data
+dir_demo: ../test
+rgb_range: 255
+n_feats: 64
+reset: False
+test_every: 1000
+epochs: 3
+batch_size: 16
+test_only: False
+lr: 0.0001
+gamma: 0.5
+loss: L1
+save: test
+load: .
+resume: 0
+print_model: False
+save_models: False
+print_every: 100
+save_results: False
+testpath: ../../data
+testset: Set5
+
+2021-11-21-16:46:20
+
+debug: False
+template: .
+dir_data: ../../data
+dir_demo: ../test
+rgb_range: 255
+n_feats: 64
+reset: False
+test_every: 1000
+epochs: 3
+batch_size: 16
+test_only: False
+lr: 0.0001
+gamma: 0.5
+loss: L1
+save: test
+load: .
+resume: 0
+print_model: False
+save_models: False
+print_every: 100
+save_results: False
+testpath: ../../data
+testset: Set5
+
+2021-11-21-16:50:28
+
+debug: False
+template: .
+dir_data: ../../data
+dir_demo: ../test
+rgb_range: 255
+n_feats: 64
+reset: False
+test_every: 1000
+epochs: 3
+batch_size: 16
+test_only: False
+lr: 0.0001
+gamma: 0.5
+loss: L1
+save: test
+load: .
+resume: 0
+print_model: False
+save_models: False
+print_every: 100
+save_results: False
+testpath: ../../data
+testset: Set5
+
+2021-11-21-16:51:43
+
+debug: False
+template: .
+dir_data: ../../data
+dir_demo: ../test
+rgb_range: 255
+n_feats: 64
+reset: False
+test_every: 1000
+epochs: 3
+batch_size: 16
+test_only: False
+lr: 0.0001
+gamma: 0.5
+loss: L1
+save: test
+load: .
+resume: 0
+print_model: False
+save_models: False
+print_every: 100
+save_results: False
+testpath: ../../data
+testset: Set5
+
+2021-11-21-16:56:18
+
+debug: False
+template: .
+dir_data: ../../data
+dir_demo: ../test
+rgb_range: 255
+n_feats: 64
+reset: False
+test_every: 1000
+epochs: 3
+batch_size: 16
+test_only: False
+lr: 0.0001
+gamma: 0.5
+loss: L1
+save: test
+load: .
+resume: 0
+print_model: False
+save_models: False
+print_every: 100
+save_results: False
+testpath: ../../data
+testset: Set5
+
+2021-11-21-16:58:18
+
+debug: False
+template: .
+dir_data: ../../data
+dir_demo: ../test
+rgb_range: 255
+n_feats: 64
+reset: False
+test_every: 1000
+epochs: 3
+batch_size: 16
+test_only: False
+lr: 0.0001
+gamma: 0.5
+loss: L1
+save: test
+load: .
+resume: 0
+print_model: False
+save_models: False
+print_every: 100
+save_results: False
+testpath: ../../data
+testset: Set5
+
+2021-11-21-17:38:09
+
+debug: False
+template: .
+dir_data: ../../data
+dir_demo: ../test
+rgb_range: 255
+n_feats: 64
+reset: False
+test_every: 1000
+epochs: 3
+batch_size: 16
+test_only: False
+lr: 0.0001
+gamma: 0.5
+loss: L1
+save: test
+load: .
+resume: 0
+print_model: False
+save_models: False
+print_every: 100
+save_results: False
+testpath: ../../data
+testset: Set5
+
+2021-11-21-17:39:55
+
+debug: False
+template: .
+dir_data: ../../data
+dir_demo: ../test
+rgb_range: 255
+n_feats: 64
+reset: False
+test_every: 1000
+epochs: 3
+batch_size: 16
+test_only: False
+lr: 0.0001
+gamma: 0.5
+loss: L1
+save: test
+load: .
+resume: 0
+print_model: False
+save_models: False
+print_every: 100
+save_results: False
+testpath: ../../data
+testset: Set5
+
+2021-11-21-17:40:39
+
+debug: False
+template: .
+dir_data: ../../data
+dir_demo: ../test
+rgb_range: 255
+n_feats: 64
+reset: False
+test_every: 1000
+epochs: 3
+batch_size: 16
+test_only: False
+lr: 0.0001
+gamma: 0.5
+loss: L1
+save: test
+load: .
+resume: 0
+print_model: False
+save_models: False
+print_every: 100
+save_results: False
+testpath: ../../data
+testset: Set5
+
+2021-11-21-17:42:03
+
+debug: False
+template: .
+dir_data: ../../data
+dir_demo: ../test
+rgb_range: 255
+n_feats: 64
+reset: False
+test_every: 1000
+epochs: 3
+batch_size: 16
+test_only: False
+lr: 0.0001
+gamma: 0.5
+loss: L1
+save: test
+load: .
+resume: 0
+print_model: False
+save_models: False
+print_every: 100
+save_results: False
+testpath: ../../data
+testset: Set5
+
+2021-11-21-17:42:52
+
+debug: False
+template: .
+dir_data: ../../data
+dir_demo: ../test
+rgb_range: 255
+n_feats: 64
+reset: False
+test_every: 1000
+epochs: 3
+batch_size: 16
+test_only: False
+lr: 0.0001
+gamma: 0.5
+loss: L1
+save: test
+load: .
+resume: 0
+print_model: False
+save_models: False
+print_every: 100
+save_results: False
+testpath: ../../data
+testset: Set5
+
+2021-11-21-17:43:31
+
+debug: False
+template: .
+dir_data: ../../data
+dir_demo: ../test
+rgb_range: 255
+n_feats: 64
+reset: False
+test_every: 1000
+epochs: 3
+batch_size: 16
+test_only: False
+lr: 0.0001
+gamma: 0.5
+loss: L1
+save: test
+load: .
+resume: 0
+print_model: False
+save_models: False
+print_every: 100
+save_results: False
+testpath: ../../data
+testset: Set5
+

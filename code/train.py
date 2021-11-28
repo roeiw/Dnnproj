@@ -39,9 +39,11 @@ class Trainer():
         self.error_last = 1e8
 
     def train(self):
+        running_loss = 0
+        number_of_batches = len(self.train_loader)
         for epoch in range(self.epochs):
             timer_data, timer_model = utility.timer(), utility.timer()
-            running_loss = 0
+
             self.model.train()
 
             for batch, data in enumerate(self.train_loader):
@@ -67,7 +69,7 @@ class Trainer():
                 timer_model.hold()
                 self.scheduler.step()
 
-                if (batch % 1000 == 0) and batch != 0 :
+                if (batch % 2000 == 0) and batch != 0 :
                     self.model.eval()
                     current_loss = 0
                     with torch.no_grad():
@@ -90,7 +92,7 @@ class Trainer():
                     print("Loss on batch: ", batch, " is: ", loss.item())
 
                 if (batch % 100 == 0):
-                    logging.info(str(batch)+" loss: " + str(running_loss))
+                    logging.info(str(batch)+" loss: " + str(running_loss/((number_of_batches*epoch)+(batch+1))))
             self.ckp.write_log('[{}/{}]\t{}\t{:.1f}+{:.1f}s'.format(
                 (epoch + 1) ,
                 len(self.train_loader.dataset),

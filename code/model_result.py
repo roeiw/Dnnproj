@@ -53,8 +53,10 @@ def compare_save_images(gt_image, noisy_image,image_path,models,models_names,ima
     for i,model in enumerate(models):
         pred_image1 = pass_though_net(model,noisy_transformed_image)
         # pred_image2 = pass_though_net(model2,noisy_transformed_image)
-
-        cv2.imwrite(image_path+models_names[i]+'.png',pred_image1*255)
+        print(pred_image1.shape)
+        print(type(pred_image1))
+        # im = Im/(image_path+models_names[i]+'.png')
+        cv2.imwrite(image_path+models_names[i]+'.png',bgr2rgb(pred_image1*255))
         print(type(gt_image))
         print(type(pred_image1))
         # psnr =
@@ -279,6 +281,10 @@ def bgr2rgb(im):
 #
 #
 def main():
+    # image = cv2.imread("../test_im/17/noisy.png")
+    # inage1 = bgr2rgb(image)
+    # cv2.imwrite("../test_im/17/noisy2.png",inage1)
+    # return 0
     # print(os.listdir())
     # homepath = '../'
     # return 0
@@ -359,8 +365,29 @@ def main():
     model9.load_state_dict(torch.load(model9_path))
     model9.eval()
 
+
+
+
     models = [model1,model2,model3,model4,model5,model6,model7,model8,model9]
     models_names = ["L1_128","L1Lab_128","L1","LabL2","LabL1","L2","ContentLossLab","Y_L1","msssim"]
+
+
+    models = [model3,model5,model8,model9]
+    models_names = ["L1","LabL1","Y_L1","msssim"]
+
+    # m1_model = ridnet.RIDNET(args)
+    # m1_model_path = '../models/LabL1_128p_191021_final.pt'
+    # m1_model.load_state_dict(torch.load(m1_model_path))
+    # m1_model.eval()
+    #
+    # ms_l1_model = ridnet.RIDNET(args)
+    # ms_l1_model_path = '../models/msssim_L1_91121_final.pt'
+    # ms_l1_model.load_state_dict(torch.load(ms_l1_model_path))
+    # ms_l1_model.eval()
+
+
+    # models = [m1_model,ms_l1_model]
+    # models_names = ["L1128_6_epoch","msssim__128p_l1_3_epoch"]
     transform = transforms.Compose([
         transforms.ToTensor()
         # transforms.RandomCrop(1000)
@@ -369,14 +396,27 @@ def main():
     ])
 
     # gt_im,noisy_im = create_cropped_images(gt_im,noisy_im,transform)
-    gt_im,noisy_im = load_im("../test_im/"+"17/",transform)
-    compare_save_images(gt_im,noisy_im,'../test_im/17/',models,models_names,"17",transform)
+    # gt_im,noisy_im = load_im("../test_im/"+"17/",transform)
+    # compare_save_images(gt_im,noisy_im,'../test_im/17/',models,models_names,"17",transform)
+    #
+    gt_im, noisy_im = load_im("../Nam/test_images/" + "52/", transform)
+    compare_save_images(gt_im,noisy_im,"../Nam/test_images/52",models,models_names,"52",transform)
 
-    gt_im, noisy_im = load_im("../test_im/" + "60/", transform)
-    compare_save_images(gt_im, noisy_im, '../test_im/60/', models, models_names, "60", transform)
 
-    gt_im, noisy_im = load_im("../test_im/" + "165/", transform)
-    compare_save_images(gt_im, noisy_im, '../test_im/165/', models, models_names, "165", transform)
+    gt_im, noisy_im = load_im("../Nam/test_images/" + "167/", transform)
+    compare_save_images(gt_im,noisy_im,"../Nam/test_images/167/",models,models_names,"167",transform)
+
+    gt_im, noisy_im = load_im("../Nam/test_images/" + "315/", transform)
+    compare_save_images(gt_im,noisy_im,"../Nam/test_images/315/" ,models,models_names,"315",transform)
+
+    gt_im, noisy_im = load_im("../Nam/test_images/" + "316/", transform)
+    compare_save_images(gt_im, noisy_im, "../Nam/test_images/316/", models, models_names, "316", transform)
+
+    # gt_im, noisy_im = load_im("../test_im/" + "60/", transform)
+    # compare_save_images(gt_im, noisy_im, '../test_im/60/', models, models_names, "60", transform)
+    #
+    # gt_im, noisy_im = load_im("../test_im/" + "165/", transform)
+    # compare_save_images(gt_im, noisy_im, '../test_im/165/', models, models_names, "165", transform)
     return 0
     transform = transforms.Compose([
         transforms.ToTensor()

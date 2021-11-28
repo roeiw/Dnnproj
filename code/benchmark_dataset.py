@@ -1,4 +1,3 @@
-import os
 import option
 from data import common
 from option import args
@@ -23,6 +22,8 @@ from scipy.io import loadmat
 from skimage.metrics import structural_similarity as ssim
 import random
 import model_result
+import os
+from tqdm import tqdm
 
 
 
@@ -40,16 +41,16 @@ gt_mat = loadmat(gt_mat_path)
 
 num_img, num_blocks, _ , _ , _ = n_mat['ValidationNoisyBlocksSrgb'].shape
 
-# for i in range(num_img):
-#     cv2.imwrite("../test_images/Noisy_test_im"+str(i)+".png",n_mat['ValidationNoisyBlocksSrgb'][i])
-#     cv2.imwrite("../test_images/GT_test_im"+str(i)+".png",gt_mat['ValidationGtBlocksSrgb'][i])
-#
-# print("Done")
+for i in range(num_img):
+    cv2.imwrite("../test_images/Noisy_test_im"+str(i)+".png",n_mat['ValidationNoisyBlocksSrgb'][i])
+    cv2.imwrite("../test_images/GT_test_im"+str(i)+".png",gt_mat['ValidationGtBlocksSrgb'][i])
+
+print("Done")
 
 num_samples = num_img*num_blocks
 
 model = ridnet.RIDNET(args)
-model_path = '../models/LabL1_128p_191021_final.pt'
+model_path = '../models/content_loss_211121_80_final.pt'
 
 model.load_state_dict(torch.load(model_path))
 model.eval()

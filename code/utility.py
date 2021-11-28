@@ -6,6 +6,7 @@ import datetime
 from functools import reduce
 
 import matplotlib
+from torchvision import models
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import kornia
@@ -87,6 +88,81 @@ def xyz2lab(xyz):
         # embed()
 
     return out
+
+def get_features(image, model, layers=None):
+    """ Run an image forward through a model and get the features for
+        a set of layers. Default layers are for VGGNet matching Gatys et al (2016)
+    """
+
+    ## TODO: Complete mapping layer names of PyTorch's VGGNet to names from the paper
+    ## Need the layers for the content and style representations of an image
+
+
+    features = {}
+    # x =
+    x = image.unsqueeze(0).cuda()
+    # model._modules is a dictionary holding each module in the model
+    for name, layer in model._modules.items():
+        x = layer(x)
+        if name in layers:
+            features[layers[name]] = x
+
+    return features
+
+
+def create_vgg19():
+    vgg = models.vgg19(pretrained=True).features
+
+    # freeze all VGG parameters since we're only optimizing the target image
+    for param in vgg.parameters():
+        param.requires_grad_(False)
+    # move the model to GPU, if available
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    vgg.to(device)
+    # print(vgg)
+    return vgg
+
+class contentLoss(torch.nn.Module):
+    def __init__(self, layers=None):
+
+        super(contentLoss, self).__init__()
+        net = create_vgg19()
+        self.model = net
+        # self.layers = layers
+        if layers is None:
+            self.layers = {
+                     # '0': 'conv1_1',
+                      # '5': 'conv2_1',
+                      # '10': 'conv3_1',
+                      # '19': 'conv4_1',
+                      '21': 'conv4_2'  ## content representation
+                      # '28': 'conv5_1'
+                           }
+        else:
+            self.layers = layers
+
+    def forward(self, pred_batch, gt_batch):
+        batch_size = pred_batch.shape[0]
+        # num_of_layers = len(self.layers)
+        gt_feature_1 = get_features(gt_batch[0,:,:,:], self.model, self.layers)['conv4_2']
+        pred_feature_1 = get_features(pred_batch[0,:,:,:], self.model, self.layers)['conv4_2']
+
+        new_size = (batch_size, gt_feature_1.shape[1],gt_feature_1.shape[2],gt_feature_1.shape[3])
+        gt_features = torch.empty(size = new_size)
+        pred_features = torch.empty(size = new_size)
+        # total_loss = 0
+
+        pred_features[0] = pred_feature_1
+        gt_features[0] = gt_feature_1
+        for i in range(1,batch_size):
+            gt_features[i] = get_features(gt_batch[i,:,:,:], self.model, self.layers)['conv4_2']
+            pred_features[i] = get_features(pred_batch[i,:,:,:],self.model, self.layers)['conv4_2']
+        total_loss = torch.mean((pred_features - gt_features)**2)
+        # total_loss /= batch_size
+        return total_loss
+
+
 
 
 def rgb2xyz(rgb): # rgb from [0,1]

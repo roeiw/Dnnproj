@@ -29,14 +29,17 @@ print(os.listdir())
 transform = transforms.Compose([
     transforms.ToTensor(),
     transforms.RandomHorizontalFlip(),
-    SIDD_Dataset.rotate_by_90_mul([0,90,180,270])
-    ])
+    SIDD_Dataset.rotate_by_90_mul([0,90,180,270]),
+    transforms.Normalize((0.485, 0.456, 0.406),
+                             (0.229, 0.224, 0.225))])
+
 # ../../../../roei.w@staff.technion.ac.il/Code/PycharmProjects/Data/SIDD_medium/Patches/image_csv.csv
 #PycharmProjects/Data/
 
-train_dataset = SIDD_Dataset.SIDD("../patches_128/image_csv1.csv","../patches_128/", transform)
+# train_dataset = SIDD_Dataset.SIDD("../patches_128/image_csv1.csv","../patches_128/", transform)
+train_dataset = SIDD_Dataset.SIDD("./Patches/image_csv.csv","./Patches/", transform)
 validation_dataset = SIDD_Dataset.SIDD("../val_128/image_csv.csv","../val_128/", transform)
-
+#
 
 
 
@@ -54,7 +57,7 @@ validation_dataloders = torch.utils.data.DataLoader(validation_dataset, batch_si
 model = ridnet.RIDNET(args)
 # num_trainable_params = sum([p.numel() for p in model.parameters() if p.requires_grad])
 # print("the number of trainable weights is: ", num_trainable_params)
-# model.load_state_dict(torch.load(model_path+'LabL1_128p_111021.pt'))
+# model.load_state_dict(torch.load(model_path+'Y_L1_241021_final.pt'))
 # dog_im = Image.open(dog_path)
 # dog_im = transform(dog_im)
 # dog2_im = Image.open(dog2_path)
@@ -69,8 +72,9 @@ model = ridnet.RIDNET(args)
 # print(lab_dog)
 # loss = nn.MSELoss()
 # LabLoss = utility.LabLoss
-loss = utility.msssim_L1
-t = Trainer(args, validation_dataloders,train_dataloders, model, loss, utility.checkpoint(args), model_path+'msssim_L1_91121.pt')
+
+loss = utility.contentLoss()
+t = Trainer(args, validation_dataloders,train_dataloders, model, loss, utility.checkpoint(args), model_path+'content_loss_211121_80.pt')
 t.train()
 
 
