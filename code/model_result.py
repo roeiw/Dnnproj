@@ -50,6 +50,8 @@ def compare_save_images(gt_image, noisy_image,image_path,models,models_names,ima
     noisy_transformed_image = noisy_image.unsqueeze(0)
     logging.basicConfig(filename = "./../logs/"+image_name+".log", level=logging.INFO)
     gt_image = gt_image.detach().permute(1,2,0).numpy()
+    print(PSNR(gt_image,noisy_image.permute(1,2,0).numpy()))
+    print(calc_ssim(gt_image,noisy_image.permute(1,2,0).numpy()))
     # print("Noisy Image PSNR is: " + str(PSNR(cv2.cvtColor(noisy_transformed_image,cv2.COLOR_BGR2RGB), gt_image)) + " SSIM is: " + str(calc_ssim(cv2.cvtColor(noisy_transformed_image,cv2.COLOR_BGR2RGB),gt_image)))
     for i,model in enumerate(models):
         pred_image1 = pass_though_net(model,noisy_transformed_image)
@@ -281,7 +283,32 @@ def bgr2rgb(im):
 # # noisy_path = '../test/'
 #
 #
+
+def test_and_save(noisy_path,model,save_path,transform):
+    noisy_im = Image.open(noisy_path)
+    model.eval()
+    # open noisy image
+
+
+    transformed_noisy = transform(noisy_im)
+
+
+
+    transformed_noisy = transformed_noisy.unsqueeze(0)
+
+    predicted_image = pass_though_net(model, transformed_noisy)
+    cv2.imwrite(save_path, bgr2rgb(predicted_image * 255))
+
 def main():
+    model = ridnet.RIDNET(args)
+    model_path = '../models/LabLoss_13921_l1.pt'
+    model.load_state_dict(torch.load(model_path))
+    transform = transforms.Compose([
+        transforms.ToTensor()
+    ])
+    test_and_save("../test_im/dog_im/dog_rni15_2.png",model,"../test_im/dog_im/pred_dog_im.png",transform)
+    print("ok ok ok ")
+    return 0
     # image = cv2.imread("../test_im/17/noisy.png")
     # inage1 = bgr2rgb(image)
     # cv2.imwrite("../test_im/17/noisy2.png",inage1)
