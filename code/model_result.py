@@ -50,6 +50,7 @@ def compare_save_images(gt_image, noisy_image,image_path,models,models_names,ima
     noisy_transformed_image = noisy_image.unsqueeze(0)
     logging.basicConfig(filename = "./../logs/"+image_name+".log", level=logging.INFO)
     gt_image = gt_image.detach().permute(1,2,0).numpy()
+    # print("Noisy Image PSNR is: " + str(PSNR(cv2.cvtColor(noisy_transformed_image,cv2.COLOR_BGR2RGB), gt_image)) + " SSIM is: " + str(calc_ssim(cv2.cvtColor(noisy_transformed_image,cv2.COLOR_BGR2RGB),gt_image)))
     for i,model in enumerate(models):
         pred_image1 = pass_though_net(model,noisy_transformed_image)
         # pred_image2 = pass_though_net(model2,noisy_transformed_image)
@@ -368,8 +369,8 @@ def main():
 
 
 
-    models = [model1,model2,model3,model4,model5,model6,model7,model8,model9]
-    models_names = ["L1_128","L1Lab_128","L1","LabL2","LabL1","L2","ContentLossLab","Y_L1","msssim"]
+    # models = [model1,model2,model3,model4,model5,model6,model7,model8,model9]
+    # models_names = ["L1_128","L1Lab_128","L1","LabL2","LabL1","L2","ContentLossLab","Y_L1","msssim"]
 
 
     models = [model3,model5,model8,model9]
@@ -399,18 +400,21 @@ def main():
     # gt_im,noisy_im = load_im("../test_im/"+"17/",transform)
     # compare_save_images(gt_im,noisy_im,'../test_im/17/',models,models_names,"17",transform)
     #
-    gt_im, noisy_im = load_im("../Nam/test_images/" + "52/", transform)
-    compare_save_images(gt_im,noisy_im,"../Nam/test_images/52",models,models_names,"52",transform)
-
-
     gt_im, noisy_im = load_im("../Nam/test_images/" + "167/", transform)
-    compare_save_images(gt_im,noisy_im,"../Nam/test_images/167/",models,models_names,"167",transform)
+    # print*
+    # print("Noisy Image PSNR is: " + str(PSNR(cv2.cvtColor(cv2.UMat(noisy_im),cv2.COLOR_BGR2RGB), gt_im)) + " SSIM is: " + str(calc_ssim(cv2.cvtColor(noisy_im,cv2.COLOR_BGR2RGB),gt_im)))
 
-    gt_im, noisy_im = load_im("../Nam/test_images/" + "315/", transform)
-    compare_save_images(gt_im,noisy_im,"../Nam/test_images/315/" ,models,models_names,"315",transform)
+    compare_save_images(gt_im,noisy_im,"../Nam/test_images/1",models,models_names,"167_91221",transform)
 
-    gt_im, noisy_im = load_im("../Nam/test_images/" + "316/", transform)
-    compare_save_images(gt_im, noisy_im, "../Nam/test_images/316/", models, models_names, "316", transform)
+
+    # gt_im, noisy_im = load_im("../Nam/test_images/" + "167/", transform)
+    # compare_save_images(gt_im,noisy_im,"../Nam/test_images/167",models,models_names,"167",transform)
+    #
+    # gt_im, noisy_im = load_im("../Nam/test_images/" + "315/", transform)
+    # compare_save_images(gt_im,noisy_im,"../Nam/test_images/315" ,models,models_names,"315",transform)
+    #
+    # gt_im, noisy_im = load_im("../Nam/test_images/" + "316/", transform)
+    # compare_save_images(gt_im, noisy_im, "../Nam/test_images/316", models, models_names, "316", transform)
 
     # gt_im, noisy_im = load_im("../test_im/" + "60/", transform)
     # compare_save_images(gt_im, noisy_im, '../test_im/60/', models, models_names, "60", transform)
