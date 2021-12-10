@@ -138,6 +138,35 @@ def test_image(gt_path, noisy_path, model_path, transform, show = True, psnr = T
         cv2.waitKey(0)
 
     return psnr_val, ssim_val
+
+
+def test_noisy_image(gt_path, noisy_path):
+    transform = transforms.Compose([
+        transforms.ToTensor()
+        # transforms.RandomCrop(1000)
+        # transforms.RandomHorizontalFlip()
+        # SIDD_Dataset.rotate_by_90_mul([0, 90, 180, 270])
+    ])
+
+    try :
+        noisy_image = PIL.Image.open(noisy_path)
+        if not gt_path is None:
+            gt_image = PIL.Image.open(gt_path)
+    except :
+        noisy_image = noisy_path
+        gt_image = gt_path
+
+    gt = transform(gt_image).permute(1,2,0).numpy()
+    noisy = transform(noisy_image).permute(1,2,0).numpy()
+
+    # loss = nn.L1Loss()
+    # print(loss(gt_image,predicted_image))
+
+    psnr_val = PSNR(noisy, gt)
+    ssim_val = calc_ssim(gt,noisy)
+
+    return psnr_val, ssim_val
+
 #
 # def test_image(gt_path, noisy_path, model_path, transform, show = True, psnr = True, ssim = True):
 #     # model load

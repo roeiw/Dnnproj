@@ -483,6 +483,7 @@ def PSNR(original, compressed):
                   # Therefore PSNR have no importance.
         return 1000
     max_pixel = 1.0
+
     psnr = 20 * log10(max_pixel / sqrt(mse))
     return psnr
 

@@ -98,7 +98,9 @@ for path,subdirs,mats in os.walk(N_mat_path):
                 num_mats += 1
                 cropped_gt = gt_mat[i:i+int(H/8),j:j+int(W/8),:]
                 cropped_noisy = noisy_mat[i:i+int(H/8),j:j+int(W/8),:]
-                psnr,ssim = model_result.test_image(cropped_gt,cropped_noisy,model_path,totensor,show=False)
+                # psnr,ssim = model_result.test_image(cropped_gt,cropped_noisy,model_path,totensor,show=False)
+
+                psnr,ssim = model_result.test_noisy_image(cropped_gt,cropped_noisy)
                 total_ssim += ssim
                 total_psnr += psnr
 print("psnr is: " + str(total_psnr / num_mats))

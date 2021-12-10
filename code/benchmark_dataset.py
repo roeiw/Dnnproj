@@ -71,8 +71,10 @@ totensor = transforms.ToTensor()
 
 for i in range(num_img):
     for j in range(num_blocks):
-        psnr,ssim = model_result.test_image(gt_mat['ValidationGtBlocksSrgb'][i][j],n_mat['ValidationNoisyBlocksSrgb'][i][j],model_path,totensor,show=False)
-
+        # psnr,ssim = model_result.test_image(gt_mat['ValidationGtBlocksSrgb'][i][j],n_mat['ValidationNoisyBlocksSrgb'][i][j],model_path,totensor,show=False)
+        psnr, ssim = model_result.test_noisy_image(gt_mat['ValidationGtBlocksSrgb'][i][j],n_mat['ValidationNoisyBlocksSrgb'][i][j])
+        print(psnr)
+        print(ssim)
         total_ssim += ssim
         total_psnr += psnr
         # cv2.imshow("pred_img", pred_img)
