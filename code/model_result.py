@@ -45,24 +45,28 @@ import logging
 
 def compare_save_images(gt_image, noisy_image,image_path,models,models_names,image_name,transform):
 
-    noisy_image_write = noisy_image.detach().permute(1, 2, 0).numpy()
-    # cv2.imwrite(image_path + 'noisy.png', (noisy_image_write * 255))
+    noisy_image_write = noisy_image.permute(1,2,0).numpy()
+    # print(noisy_image_write)
+    print(cv2.imwrite(image_path + '/small_noisy.png', rgb2bgr(noisy_image_write*255)))
+
+
+
     noisy_transformed_image = noisy_image.unsqueeze(0)
     logging.basicConfig(filename = "./../logs/"+image_name+".log", level=logging.INFO)
-    gt_image = gt_image.detach().permute(1,2,0).numpy()
+    gt_image = gt_image.permute(1,2,0).numpy()
+    print(cv2.imwrite(image_path + 'small_gt' + '.png', rgb2bgr(gt_image*255)))
+    logging.info("psnr for noisy image is " + str(PSNR(gt_image,noisy_image.permute(1,2,0).numpy())) + " ssim is: " + str(
+        calc_ssim(gt_image,noisy_image.permute(1,2,0).numpy())))
     print(PSNR(gt_image,noisy_image.permute(1,2,0).numpy()))
     print(calc_ssim(gt_image,noisy_image.permute(1,2,0).numpy()))
     # print("Noisy Image PSNR is: " + str(PSNR(cv2.cvtColor(noisy_transformed_image,cv2.COLOR_BGR2RGB), gt_image)) + " SSIM is: " + str(calc_ssim(cv2.cvtColor(noisy_transformed_image,cv2.COLOR_BGR2RGB),gt_image)))
     for i,model in enumerate(models):
         pred_image1 = pass_though_net(model,noisy_transformed_image)
         # pred_image2 = pass_though_net(model2,noisy_transformed_image)
-        print(pred_image1.shape)
-        print(type(pred_image1))
+
         # im = Im/(image_path+models_names[i]+'.png')
         cv2.imwrite(image_path+models_names[i]+'.png',bgr2rgb(pred_image1*255))
-        print(type(gt_image))
-        print(type(pred_image1))
-        # psnr =
+
         print("psnr for "+ models_names[i]+" image is " + str(PSNR(pred_image1,gt_image)) + " ssim is:" + str(calc_ssim(pred_image1,gt_image)))
         logging.info("psnr for "+ models_names[i]+" image is " + str(PSNR(pred_image1,gt_image))+ " ssim is: " + str(calc_ssim(pred_image1,gt_image)))
 
@@ -299,14 +303,17 @@ def create_cropped_images(gt_image,noisy_image,transform):
 def load_im(folder_path,transform):
     gt_im = Image.open(folder_path+"gt.png")
     noisy_im = Image.open(folder_path+"noisy.png")
-
-    return transform(gt_im),transform(noisy_im)
+    cropped_GT_image,cropped_NOISY_image = create_cropped_images(gt_im,noisy_im,transform)
+    return  cropped_GT_image,cropped_NOISY_image
 
 
 def bgr2rgb(im):
-    im = cv2.cvtColor(im,cv2.COLOR_BGR2RGB)
-    return im
+    im1 = cv2.cvtColor(im,cv2.COLOR_BGR2RGB)
+    return im1
 
+def rgb2bgr(im):
+    im1 = cv2.cvtColor(im, cv2.COLOR_RGB2BGR)
+    return im1
 # N_mat_path = '../test/ValidationNoisyBlocksSrgb.mat'
 # gt_mat_path = '../test/ValidationGtBlocksSrgb.mat'
 # # noisy_path = '../test/'
@@ -327,17 +334,36 @@ def test_and_save(noisy_path,model,save_path,transform):
 
     predicted_image = pass_though_net(model, transformed_noisy)
     cv2.imwrite(save_path, bgr2rgb(predicted_image * 255))
+def get_image_from_mat_db(mat_path):
+    mat = loadmat(mat_path) #mat is dict
+    print(type(mat['img_mean']))
+    print(cv2.imwrite('../Nam/Big_images/gt.png',bgr2rgb(mat['img_mean'])))
+    print(cv2.imwrite('../Nam/Big_images/noisy.png',bgr2rgb(mat['img_noisy'])))
+    # nam_name = (nam_path.split('/')[-2] +'_' + nam_path.split('/')[-1]).replace('mat','PNG')
+    # print(nam_name)
+    # print(nam_mat.keys())
+    # print(nam_mat['img_mean'].shape)
+    # print(nam_mat['img_cov'].shape)
+    # print(nam_mat['img_noisy'].shape)
+    # im1 = nam_mat['img_cov'].astype('uint8')
+    # im2 = nam_mat['img_mean'].astype('uint8')
 
 def main():
+    # get_image_from_mat_db('../Nam/mat/Canon_EOS_5D_Mark3/ISO_3200/C_2.mat')
+    # return 0
+
     model = ridnet.RIDNET(args)
-    model_path = '../models/LabLoss_13921_l1.pt'
+    model_path = '../models/mssim_61121.pt'
     model.load_state_dict(torch.load(model_path))
     transform = transforms.Compose([
         transforms.ToTensor()
     ])
-    test_and_save("../test_im/dog_im/dog_rni15_2.png",model,"../test_im/dog_im/pred_dog_im.png",transform)
+    test_and_save("../test_im/dog_im/dog_rni15_2.png",model,"../test_im/dog_im/dog_rni15_msssim.png",transform)
     print("ok ok ok ")
     return 0
+
+
+
     # image = cv2.imread("../test_im/17/noisy.png")
     # inage1 = bgr2rgb(image)
     # cv2.imwrite("../test_im/17/noisy2.png",inage1)
@@ -446,21 +472,26 @@ def main():
     # models = [m1_model,ms_l1_model]
     # models_names = ["L1128_6_epoch","msssim__128p_l1_3_epoch"]
     transform = transforms.Compose([
-        transforms.ToTensor()
-        # transforms.RandomCrop(1000)
+        transforms.ToTensor(),
+        transforms.RandomCrop(1000)
         # transforms.RandomHorizontalFlip()
         # SIDD_Dataset.rotate_by_90_mul([0, 90, 180, 270])
     ])
 
+    transform1 = transforms.Compose([
+        transforms.ToTensor(),
+        # transforms.RandomHorizontalFlip()
+        # SIDD_Dataset.rotate_by_90_mul([0, 90, 180, 270])
+    ])
     # gt_im,noisy_im = create_cropped_images(gt_im,noisy_im,transform)
     # gt_im,noisy_im = load_im("../test_im/"+"17/",transform)
     # compare_save_images(gt_im,noisy_im,'../test_im/17/',models,models_names,"17",transform)
     #
-    gt_im, noisy_im = load_im("../Nam/test_images/" + "167/", transform)
+    gt_im, noisy_im = load_im("../big_images/chess/", transform)#image names should be gt.png and noisy.png. you can control crop with transforms
     # print*
     # print("Noisy Image PSNR is: " + str(PSNR(cv2.cvtColor(cv2.UMat(noisy_im),cv2.COLOR_BGR2RGB), gt_im)) + " SSIM is: " + str(calc_ssim(cv2.cvtColor(noisy_im,cv2.COLOR_BGR2RGB),gt_im)))
 
-    compare_save_images(gt_im,noisy_im,"../Nam/test_images/1",models,models_names,"167_91221",transform)
+    compare_save_images(gt_im,noisy_im,"../big_images/chess/",models,models_names,"chess_im_161221",transform1)
 
 
     # gt_im, noisy_im = load_im("../Nam/test_images/" + "167/", transform)
