@@ -65,7 +65,7 @@ def compare_save_images(gt_image, noisy_image,image_path,models,models_names,ima
         # pred_image2 = pass_though_net(model2,noisy_transformed_image)
 
         # im = Im/(image_path+models_names[i]+'.png')
-        cv2.imwrite(image_path+models_names[i]+'.png',bgr2rgb(pred_image1*255))
+        cv2.imwrite(image_path+models_names[i]+'.png',pred_image1*255)
 
         print("psnr for "+ models_names[i]+" image is " + str(PSNR(pred_image1,gt_image)) + " ssim is:" + str(calc_ssim(pred_image1,gt_image)))
         logging.info("psnr for "+ models_names[i]+" image is " + str(PSNR(pred_image1,gt_image))+ " ssim is: " + str(calc_ssim(pred_image1,gt_image)))
@@ -300,11 +300,14 @@ def create_cropped_images(gt_image,noisy_image,transform):
     cropped_NOISY_image = transform(noisy_image)
     return cropped_GT_image,cropped_NOISY_image
 
-def load_im(folder_path,transform):
+def load_im(folder_path,transform,crop):
     gt_im = Image.open(folder_path+"gt.png")
     noisy_im = Image.open(folder_path+"noisy.png")
-    cropped_GT_image,cropped_NOISY_image = create_cropped_images(gt_im,noisy_im,transform)
-    return  cropped_GT_image,cropped_NOISY_image
+    if crop:
+        cropped_GT_image,cropped_NOISY_image = create_cropped_images(gt_im,noisy_im,transform)
+        return  cropped_GT_image,cropped_NOISY_image
+    else:
+        return transform(gt_im), transform(noisy_im)
 
 
 def bgr2rgb(im):
@@ -349,18 +352,18 @@ def get_image_from_mat_db(mat_path):
     # im2 = nam_mat['img_mean'].astype('uint8')
 
 def main():
-    # get_image_from_mat_db('../Nam/mat/Canon_EOS_5D_Mark3/ISO_3200/C_2.mat')
-    # return 0
-
-    model = ridnet.RIDNET(args)
-    model_path = '../models/mssim_61121.pt'
-    model.load_state_dict(torch.load(model_path))
-    transform = transforms.Compose([
-        transforms.ToTensor()
-    ])
-    test_and_save("../test_im/dog_im/dog_rni15_2.png",model,"../test_im/dog_im/dog_rni15_msssim.png",transform)
-    print("ok ok ok ")
-    return 0
+#     # get_image_from_mat_db('../Nam/mat/Canon_EOS_5D_Mark3/ISO_3200/C_2.mat')
+#     # return 0
+#
+#     model = ridnet.RIDNET(args)
+#     model_path = '../models/mssim_61121.pt'
+#     model.load_state_dict(torch.load(model_path))
+#     transform = transforms.Compose([
+#         transforms.ToTensor()
+#     ])
+#     test_and_save("../test_im/dog_im/dog_rni15_2.png",model,"../test_im/dog_im/dog_rni15_msssim.png",transform)
+#     print("ok ok ok ")
+#     return 0
 
 
 
@@ -448,15 +451,17 @@ def main():
     model9.load_state_dict(torch.load(model9_path))
     model9.eval()
 
-
-
+    model10 = ridnet.RIDNET(args)
+    model10_path = '../models/content_loss_211121_80.pt'
+    model10.load_state_dict(torch.load(model10_path))
+    model10.eval()
 
     # models = [model1,model2,model3,model4,model5,model6,model7,model8,model9]
     # models_names = ["L1_128","L1Lab_128","L1","LabL2","LabL1","L2","ContentLossLab","Y_L1","msssim"]
 
 
-    models = [model3,model5,model8,model9]
-    models_names = ["L1","LabL1","Y_L1","msssim"]
+    models = [model10]
+    models_names = ["contentloss_dec"]
 
     # m1_model = ridnet.RIDNET(args)
     # m1_model_path = '../models/LabL1_128p_191021_final.pt'
@@ -471,14 +476,14 @@ def main():
 
     # models = [m1_model,ms_l1_model]
     # models_names = ["L1128_6_epoch","msssim__128p_l1_3_epoch"]
-    transform = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.RandomCrop(1000)
-        # transforms.RandomHorizontalFlip()
-        # SIDD_Dataset.rotate_by_90_mul([0, 90, 180, 270])
-    ])
+    # transform = transforms.Compose([
+    #     transforms.ToTensor(),
+    #     transforms.RandomCrop(1000)
+    #     # transforms.RandomHorizontalFlip()
+    #     # SIDD_Dataset.rotate_by_90_mul([0, 90, 180, 270])
+    # ])
 
-    transform1 = transforms.Compose([
+    transform = transforms.Compose([
         transforms.ToTensor(),
         # transforms.RandomHorizontalFlip()
         # SIDD_Dataset.rotate_by_90_mul([0, 90, 180, 270])
@@ -487,27 +492,27 @@ def main():
     # gt_im,noisy_im = load_im("../test_im/"+"17/",transform)
     # compare_save_images(gt_im,noisy_im,'../test_im/17/',models,models_names,"17",transform)
     #
-    gt_im, noisy_im = load_im("../big_images/chess/", transform)#image names should be gt.png and noisy.png. you can control crop with transforms
+    # gt_im, noisy_im = load_im("../big_images/chess/", transform)#image names should be gt.png and noisy.png. you can control crop with transforms
     # print*
     # print("Noisy Image PSNR is: " + str(PSNR(cv2.cvtColor(cv2.UMat(noisy_im),cv2.COLOR_BGR2RGB), gt_im)) + " SSIM is: " + str(calc_ssim(cv2.cvtColor(noisy_im,cv2.COLOR_BGR2RGB),gt_im)))
 
-    compare_save_images(gt_im,noisy_im,"../big_images/chess/",models,models_names,"chess_im_161221",transform1)
+    # compare_save_images(gt_im,noisy_im,"../big_images/chess/",models,models_names,"chess_im_161221",transform1)
 
 
-    # gt_im, noisy_im = load_im("../Nam/test_images/" + "167/", transform)
-    # compare_save_images(gt_im,noisy_im,"../Nam/test_images/167",models,models_names,"167",transform)
-    #
-    # gt_im, noisy_im = load_im("../Nam/test_images/" + "315/", transform)
-    # compare_save_images(gt_im,noisy_im,"../Nam/test_images/315" ,models,models_names,"315",transform)
-    #
-    # gt_im, noisy_im = load_im("../Nam/test_images/" + "316/", transform)
-    # compare_save_images(gt_im, noisy_im, "../Nam/test_images/316", models, models_names, "316", transform)
+    gt_im, noisy_im = load_im("../Nam/test_images/" + "167/", transform,False)
+    compare_save_images(gt_im,noisy_im,"../Nam/test_images/167",models,models_names,"167",transform)
 
-    # gt_im, noisy_im = load_im("../test_im/" + "60/", transform)
-    # compare_save_images(gt_im, noisy_im, '../test_im/60/', models, models_names, "60", transform)
-    #
-    # gt_im, noisy_im = load_im("../test_im/" + "165/", transform)
-    # compare_save_images(gt_im, noisy_im, '../test_im/165/', models, models_names, "165", transform)
+    gt_im, noisy_im = load_im("../Nam/test_images/" + "315/", transform,False)
+    compare_save_images(gt_im,noisy_im,"../Nam/test_images/315" ,models,models_names,"315",transform)
+
+    gt_im, noisy_im = load_im("../Nam/test_images/" + "316/", transform,False)
+    compare_save_images(gt_im, noisy_im, "../Nam/test_images/316", models, models_names, "316", transform)
+
+    gt_im, noisy_im = load_im("../test_im/" + "60/", transform,False)
+    compare_save_images(gt_im, noisy_im, '../test_im/60/', models, models_names, "60", transform)
+
+    gt_im, noisy_im = load_im("../test_im/" + "165/", transform,False)
+    compare_save_images(gt_im, noisy_im, '../test_im/165/', models, models_names, "165", transform)
     return 0
     transform = transforms.Compose([
         transforms.ToTensor()

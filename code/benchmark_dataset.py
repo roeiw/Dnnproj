@@ -50,7 +50,7 @@ print("Done")
 num_samples = num_img*num_blocks
 
 model = ridnet.RIDNET(args)
-model_path = '../models/content_loss_211121_80_final.pt'
+model_path = '../models/content_loss_241221_80.pt'
 
 model.load_state_dict(torch.load(model_path))
 model.eval()
@@ -71,10 +71,10 @@ totensor = transforms.ToTensor()
 
 for i in range(num_img):
     for j in range(num_blocks):
-        # psnr,ssim = model_result.test_image(gt_mat['ValidationGtBlocksSrgb'][i][j],n_mat['ValidationNoisyBlocksSrgb'][i][j],model_path,totensor,show=False)
-        psnr, ssim = model_result.test_noisy_image(gt_mat['ValidationGtBlocksSrgb'][i][j],n_mat['ValidationNoisyBlocksSrgb'][i][j])
-        print(psnr)
-        print(ssim)
+        psnr,ssim = model_result.test_image(gt_mat['ValidationGtBlocksSrgb'][i][j],n_mat['ValidationNoisyBlocksSrgb'][i][j],model_path,totensor,show=False)
+        # psnr, ssim = model_result.test_noisy_image(gt_mat['ValidationGtBlocksSrgb'][i][j],n_mat['ValidationNoisyBlocksSrgb'][i][j])
+        # print(psnr)
+        # print(ssim)
         total_ssim += ssim
         total_psnr += psnr
         # cv2.imshow("pred_img", pred_img)

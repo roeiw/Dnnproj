@@ -74,7 +74,7 @@ model = ridnet.RIDNET(args)
 # LabLoss = utility.LabLoss
 
 loss = utility.contentLoss()
-t = Trainer(args, validation_dataloders,train_dataloders, model, loss, utility.checkpoint(args), model_path+'content_loss_211121_80.pt')
+t = Trainer(args, validation_dataloders,train_dataloders, model, loss, utility.checkpoint(args), model_path+'content_loss_241221_80.pt')
 t.train()
 
 

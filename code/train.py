@@ -19,9 +19,9 @@ class Trainer():
         self.val_loader = val_loader
         self.model = my_model
         self.loss = my_loss
-        self.optimizer = torch.optim.Adam(self.model.parameters(),lr=1e-4)
+        self.optimizer = torch.optim.Adam(self.model.parameters(),lr=1e-3)
         # self.scheduler = utility.make_scheduler(args,self.optimizer)
-        self.scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer,5000,0.6)
+        self.scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer,15000,0.5)
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         print(self.device)
         self.path = save_path
@@ -92,13 +92,11 @@ class Trainer():
                     print("Loss on batch: ", batch, " is: ", loss.item())
 
                 if (batch % 100 == 0):
-                    logging.info(str(batch)+" loss: " + str(running_loss/((number_of_batches*epoch)+(batch+1))))
-            self.ckp.write_log('[{}/{}]\t{}\t{:.1f}+{:.1f}s'.format(
-                (epoch + 1) ,
-                len(self.train_loader.dataset),
-                running_loss/len(self.train_loader.dataset),
-                timer_model.release(),
-                timer_data.release()))
+                   actual_lr = 0
+                   for param_group in self.optimizer.param_groups:
+                        actual_lr = param_group['lr']
+                   logging.info(str(batch)+" loss: " + str(running_loss/((number_of_batches*epoch)+(batch+1))) + " lr is: " + str(actual_lr))
+
 
             timer_data.tic()
         path_split = self.path.split('.pt')
