@@ -9888,3 +9888,341 @@ save_results: False
 testpath: ../../data
 testset: Set5
 
+2021-12-24-12:56:25
+
+debug: False
+template: .
+dir_data: ../../data
+dir_demo: ../test
+rgb_range: 255
+n_feats: 64
+reset: False
+test_every: 1000
+epochs: 3
+batch_size: 16
+test_only: False
+lr: 0.0001
+gamma: 0.5
+loss: L1
+save: test
+load: .
+resume: 0
+print_model: False
+save_models: False
+print_every: 100
+save_results: False
+testpath: ../../data
+testset: Set5
+
+2021-12-24-12:57:28
+
+debug: False
+template: .
+dir_data: ../../data
+dir_demo: ../test
+rgb_range: 255
+n_feats: 64
+reset: False
+test_every: 1000
+epochs: 3
+batch_size: 16
+test_only: False
+lr: 0.0001
+gamma: 0.5
+loss: L1
+save: test
+load: .
+resume: 0
+print_model: False
+save_models: False
+print_every: 100
+save_results: False
+testpath: ../../data
+testset: Set5
+
+2021-12-24-12:58:31
+
+debug: False
+template: .
+dir_data: ../../data
+dir_demo: ../test
+rgb_range: 255
+n_feats: 64
+reset: False
+test_every: 1000
+epochs: 3
+batch_size: 16
+test_only: False
+lr: 0.0001
+gamma: 0.5
+loss: L1
+save: test
+load: .
+resume: 0
+print_model: False
+save_models: False
+print_every: 100
+save_results: False
+testpath: ../../data
+testset: Set5
+
+2021-12-24-12:59:05
+
+debug: False
+template: .
+dir_data: ../../data
+dir_demo: ../test
+rgb_range: 255
+n_feats: 64
+reset: False
+test_every: 1000
+epochs: 3
+batch_size: 16
+test_only: False
+lr: 0.0001
+gamma: 0.5
+loss: L1
+save: test
+load: .
+resume: 0
+print_model: False
+save_models: False
+print_every: 100
+save_results: False
+testpath: ../../data
+testset: Set5
+
+2021-12-24-13:00:34
+
+debug: False
+template: .
+dir_data: ../../data
+dir_demo: ../test
+rgb_range: 255
+n_feats: 64
+reset: False
+test_every: 1000
+epochs: 3
+batch_size: 16
+test_only: False
+lr: 0.0001
+gamma: 0.5
+loss: L1
+save: test
+load: .
+resume: 0
+print_model: False
+save_models: False
+print_every: 100
+save_results: False
+testpath: ../../data
+testset: Set5
+
+2021-12-24-13:01:12
+
+debug: False
+template: .
+dir_data: ../../data
+dir_demo: ../test
+rgb_range: 255
+n_feats: 64
+reset: False
+test_every: 1000
+epochs: 3
+batch_size: 16
+test_only: False
+lr: 0.0001
+gamma: 0.5
+loss: L1
+save: test
+load: .
+resume: 0
+print_model: False
+save_models: False
+print_every: 100
+save_results: False
+testpath: ../../data
+testset: Set5
+
+2021-12-24-13:01:38
+
+debug: False
+template: .
+dir_data: ../../data
+dir_demo: ../test
+rgb_range: 255
+n_feats: 64
+reset: False
+test_every: 1000
+epochs: 3
+batch_size: 16
+test_only: False
+lr: 0.0001
+gamma: 0.5
+loss: L1
+save: test
+load: .
+resume: 0
+print_model: False
+save_models: False
+print_every: 100
+save_results: False
+testpath: ../../data
+testset: Set5
+
+2021-12-24-13:07:56
+
+debug: False
+template: .
+dir_data: ../../data
+dir_demo: ../test
+rgb_range: 255
+n_feats: 64
+reset: False
+test_every: 1000
+epochs: 3
+batch_size: 16
+test_only: False
+lr: 0.0001
+gamma: 0.5
+loss: L1
+save: test
+load: .
+resume: 0
+print_model: False
+save_models: False
+print_every: 100
+save_results: False
+testpath: ../../data
+testset: Set5
+
+2021-12-24-13:17:19
+
+debug: False
+template: .
+dir_data: ../../data
+dir_demo: ../test
+rgb_range: 255
+n_feats: 64
+reset: False
+test_every: 1000
+epochs: 3
+batch_size: 16
+test_only: False
+lr: 0.0001
+gamma: 0.5
+loss: L1
+save: test
+load: .
+resume: 0
+print_model: False
+save_models: False
+print_every: 100
+save_results: False
+testpath: ../../data
+testset: Set5
+
+2021-12-24-13:18:44
+
+debug: False
+template: .
+dir_data: ../../data
+dir_demo: ../test
+rgb_range: 255
+n_feats: 64
+reset: False
+test_every: 1000
+epochs: 3
+batch_size: 16
+test_only: False
+lr: 0.0001
+gamma: 0.5
+loss: L1
+save: test
+load: .
+resume: 0
+print_model: False
+save_models: False
+print_every: 100
+save_results: False
+testpath: ../../data
+testset: Set5
+
+2021-12-24-13:19:11
+
+debug: False
+template: .
+dir_data: ../../data
+dir_demo: ../test
+rgb_range: 255
+n_feats: 64
+reset: False
+test_every: 1000
+epochs: 3
+batch_size: 16
+test_only: False
+lr: 0.0001
+gamma: 0.5
+loss: L1
+save: test
+load: .
+resume: 0
+print_model: False
+save_models: False
+print_every: 100
+save_results: False
+testpath: ../../data
+testset: Set5
+
+2021-12-24-13:20:46
+
+debug: False
+template: .
+dir_data: ../../data
+dir_demo: ../test
+rgb_range: 255
+n_feats: 64
+reset: False
+test_every: 1000
+epochs: 3
+batch_size: 16
+test_only: False
+lr: 0.0001
+gamma: 0.5
+loss: L1
+save: test
+load: .
+resume: 0
+print_model: False
+save_models: False
+print_every: 100
+save_results: False
+testpath: ../../data
+testset: Set5
+
+2021-12-24-13:21:29
+
+debug: False
+template: .
+dir_data: ../../data
+dir_demo: ../test
+rgb_range: 255
+n_feats: 64
+reset: False
+test_every: 1000
+epochs: 3
+batch_size: 16
+test_only: False
+lr: 0.0001
+gamma: 0.5
+loss: L1
+save: test
+load: .
+resume: 0
+print_model: False
+save_models: False
+print_every: 100
+save_results: False
+testpath: ../../data
+testset: Set5
+

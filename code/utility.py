@@ -22,7 +22,6 @@ import lpips
 from pytorch_msssim import ms_ssim
 
 
-
 def msssim(pred_batch,gt_batch):
     ms_ssim_loss = 1-ms_ssim(pred_batch,gt_batch,data_range=1,win_size=7)
     return ms_ssim_loss
@@ -470,7 +469,7 @@ def PSNR(original, compressed):
         return 1000
     max_pixel = 1.0
 
-    psnr = 20 * log10(max_pixel / sqrt(mse))
+    psnr = 20 * math.log10(max_pixel / math.sqrt(mse))
     return psnr
 
 def calc_psnr(sr, hr, rgb_range):
