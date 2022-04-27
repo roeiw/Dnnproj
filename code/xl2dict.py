@@ -9,7 +9,7 @@ def convert_2_csv():
 
 def get_cam_iso_dict():
     iso_cam_dict={}
-    with open(r'../gammas_and_shit.csv') as csv_file:
+    with open(r'../../gammas_and_shit.csv') as csv_file:
         reader = csv.reader(csv_file)
         header = reader.__next__()
         print(header)
@@ -24,6 +24,7 @@ def get_cam_iso_dict():
                     iso_cam_dict[key] = value
 
             else:  iso_cam_dict[key] = value
+    return iso_cam_dict
 def write_csv(iso_cam_dict):
     with open('../best_lambdas.csv',"w") as csv_file:
         writer = csv.writer(csv_file)
