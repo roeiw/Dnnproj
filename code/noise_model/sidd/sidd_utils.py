@@ -26,6 +26,7 @@ from threading import Thread
 import cv2
 import h5py
 import imageio
+import numpy
 import numpy as np
 from os import path
 
@@ -39,30 +40,28 @@ from noise_model.sidd.pipeline import process_sidd_image
 import sidd.data_loader as loader
 from sidd.raw_utils import add_noise_to_raw
 # from image_pipeline.ImagePipeline import ImagePipeline
-data_dir = './../../mats/raw_mats/images/'
+data_dir = '../../../../../data/raw/SIDD_Medium_Raw/'
 sidd_path = data_dir #os.path.join(data_dir, 'SIDD_Medium_Raw/Data')
 nf_model_path = 'models/NoiseFlow'
 
-samples_dir = os.path.join(data_dir, '../samples')
+samples_dir = os.path.join(data_dir, 'examples/')
 
 
-def rate_lamdas(raw,noisy,camera,bayer_2by2, wb, cst2,sc_id,cam_dict,iso,gauss_dict,read_dict,save_num):
-    lambda_shots = [10**(-1.1),10**(-1.2),10**(-1.3),10**(-1.4),10**(-1.45),10**(-1.5),10**(-1.55),10**(-1.6),10**(-1.65),10**(-1.75),10**(-2)]
-    lambda_reads = [10**(-2.5),10**(-3),10**(-4.5)]
+def generate_noisy_examples(raw,noisy,camera,bayer_2by2, wb, cst2,sc_id,iso):
+    lambda_shots = numpy.linspace(10 ** (-1), 10 ** (-3), 5)
+    lambda_reads = numpy.linspace(10 ** (-2), 10 ** (-5), 3)
     patch_size = 80
-
     for lambda1 in lambda_shots:
-        gauss_flag = False
-        save_flag = (save_num >= 0)
         for lambda_read in lambda_reads:
-            syn_noise, gauss_noise, read_noise = add_noise_to_raw(raw,lambda_read,lambda1)
-            syn_noisy = loader.get_raw_packed(syn_noise)
+            read_noise,gauss_noise,shot_noise= add_noise_to_raw(raw,lambda_read,lambda1)
+            syn_noisy = loader.get_raw_packed(shot_noise)
             clean = loader.get_raw_packed(raw)
-            if not gauss_flag : gauss = loader.get_raw_packed(gauss_noise)
+            # if not gauss_flag : gauss = loader.get_raw_packed(gauss_noise)
             read = loader.get_raw_packed(read_noise)
-            key = "lambda_shot "+str(lambda1)+"_lambda_read_"+str(lambda_read)+"_"+str(camera)+"_"+str(iso)
+            gauss = loader.get_raw_packed(gauss_noise)
+            key = "lambda_shot_"+str(lambda1)+"_lambda_read_"+str(lambda_read)+"_"+str(camera)+"_"+str(iso)
             np.random.seed(12345)  # for reproducibility
-            n_pat = 30
+            n_pat = 1
 
             for p in range(n_pat):
                 # crop patches
@@ -70,32 +69,88 @@ def rate_lamdas(raw,noisy,camera,bayer_2by2, wb, cst2,sc_id,cam_dict,iso,gauss_d
                 u = np.random.randint(0, clean.shape[2] - patch_size)
 
                 clean_patch = process_raw_for_save(clean, u, v, patch_size, bayer_2by2, wb, cst2, samples_dir, sc_id, p,
-                                                   iso, "clean",save=save_flag)
+                                                   iso, "clean",save=False)
                 noisy_patch = process_raw_for_save(noisy, u, v, patch_size, bayer_2by2, wb, cst2, samples_dir, sc_id, p,
-                                                   iso, "noisy",save=save_flag)
-
-                if not gauss_flag :
-                    gauss_patch = process_raw_for_save(gauss, u, v, patch_size, bayer_2by2, wb, cst2,
-                                                                       samples_dir, sc_id, p, iso, "gauss",save=save_flag)
-                    syn_noise_patch = process_raw_for_save(syn_noisy, u, v, patch_size, bayer_2by2, wb, cst2,
-                                                           samples_dir, sc_id, p, iso, "syn_noisy", save=save_flag)
+                                                   iso, "noisy",save=False)
+                gauss_patch = process_raw_for_save(gauss, u, v, patch_size, bayer_2by2, wb, cst2,
+                                                                       samples_dir, sc_id, p, iso, "gauss",save=False)
+                syn_noise_patch = process_raw_for_save(syn_noisy, u, v, patch_size, bayer_2by2, wb, cst2,
+                                                           samples_dir, sc_id, p, iso, "syn_noisy", save=False)
                 read_noise_patch = process_raw_for_save(read, u, v, patch_size, bayer_2by2, wb, cst2, samples_dir, sc_id, p,
-                                                        iso, "read_noise",save=save_flag)
+                                                        iso, "read_noise",save=False)
+
+                _, _, kldiv_shot = kl_div_3_data(noisy_patch.flatten() - clean_patch.flatten(),
+                                                    syn_noise_patch.flatten() - clean_patch.flatten())
+                _, _, kldiv_gauss = kl_div_3_data(noisy_patch.flatten() - clean_patch.flatten(),
+                                                 gauss_patch.flatten() - clean_patch.flatten())
+                _, _, kldiv_read = kl_div_3_data(noisy_patch.flatten() - clean_patch.flatten(),
+                                             read_noise_patch.flatten() - clean_patch.flatten())
+
+                save_shot = os.path.join(samples_dir, key +'_klshot_'+ str(kldiv_shot).split('.')[1]+'_%02d_%02d_%04d.png' % (sc_id, p, iso))
+                save_read = os.path.join(samples_dir, key +'_klread_'+ str(kldiv_read).split('.')[1]+'_%02d_%02d_%04d.png' % (sc_id, p, iso))
+                save_gauss = os.path.join(samples_dir, key +'_klgauss_'+ str(kldiv_gauss).split('.')[1]+'_%02d_%02d_%04d.png' % (sc_id, p, iso))
+                save_gt = os.path.join(samples_dir, key +'_gt_%02d_%02d_%04d.png' % (sc_id, p, iso))
+                save_noisy = os.path.join(samples_dir, key +'_noisy_%02d_%02d_%04d.png' % (sc_id, p, iso))
+
+                cv2.imwrite(save_shot, syn_noise_patch)
+                cv2.imwrite(save_read, read_noise_patch)
+                cv2.imwrite(save_gauss, gauss_patch)
+                cv2.imwrite(save_gt, clean_patch)
+                cv2.imwrite(save_noisy, noisy_patch)
+
+
+
+
+def rate_lamdas(raw,noisy,camera,bayer_2by2, wb, cst2,sc_id,cam_dict,iso,gauss_dict,read_dict,save_num):
+    lambda_shots = numpy.linspace(10**(-1),10**(-3),20)
+    lambda_reads = numpy.linspace(10**(-2),10**(-5),6)
+    patch_size = 80
+
+    for lambda1 in lambda_shots:
+        gauss_flag = False
+        save_flag = (save_num >= 0)
+        for lambda_read in lambda_reads:
+            read_noise,_,_ = add_noise_to_raw(raw,lambda_read,lambda1)
+            # syn_noisy = loader.get_raw_packed(syn_noise)
+            clean = loader.get_raw_packed(raw)
+            # if not gauss_flag : gauss = loader.get_raw_packed(gauss_noise)
+            read = loader.get_raw_packed(read_noise)
+            key = "lambda_shot_"+str(lambda1)+"_lambda_read_"+str(lambda_read)+"_"+str(camera)+"_"+str(iso)
+            np.random.seed(12345)  # for reproducibility
+            n_pat = 40
+
+            for p in range(n_pat):
+                # crop patches
+                v = np.random.randint(0, clean.shape[1] - patch_size)
+                u = np.random.randint(0, clean.shape[2] - patch_size)
+
+                clean_patch = process_raw_for_save(clean, u, v, patch_size, bayer_2by2, wb, cst2, samples_dir, sc_id, p,
+                                                   iso, "clean",save=False)
+                noisy_patch = process_raw_for_save(noisy, u, v, patch_size, bayer_2by2, wb, cst2, samples_dir, sc_id, p,
+                                                   iso, "noisy",save=False)
+
+                # if not gauss_flag :
+                #     gauss_patch = process_raw_for_save(gauss, u, v, patch_size, bayer_2by2, wb, cst2,
+                #                                                        samples_dir, sc_id, p, iso, "gauss",save=save_flag)
+                #     syn_noise_patch = process_raw_for_save(syn_noisy, u, v, patch_size, bayer_2by2, wb, cst2,
+                #                                            samples_dir, sc_id, p, iso, "syn_noisy", save=save_flag)
+                read_noise_patch = process_raw_for_save(read, u, v, patch_size, bayer_2by2, wb, cst2, samples_dir, sc_id, p,
+                                                        iso, "read_noise",save=False)
 
                 save_flag = False
-                if not gauss_flag:
-                    _, _, kldiv_fwd = kl_div_3_data(noisy_patch.flatten() - clean_patch.flatten(),
-                                                    syn_noise_patch.flatten() - clean_patch.flatten())
-                    _, _, kldiv_fwd1 = kl_div_3_data(noisy_patch.flatten() - clean_patch.flatten(),
-                                                 gauss_patch.flatten() - clean_patch.flatten())
-                    if key in cam_dict.keys():
-                        cam_dict[key].append(kldiv_fwd)
-                    else:
-                        cam_dict[key] = [kldiv_fwd]
-                    if key in gauss_dict.keys():
-                        gauss_dict[key].append(kldiv_fwd1)
-                    else:
-                        gauss_dict[key] = [kldiv_fwd1]
+                # if not gauss_flag:
+                #     _, _, kldiv_fwd = kl_div_3_data(noisy_patch.flatten() - clean_patch.flatten(),
+                #                                     syn_noise_patch.flatten() - clean_patch.flatten())
+                #     _, _, kldiv_fwd1 = kl_div_3_data(noisy_patch.flatten() - clean_patch.flatten(),
+                #                                  gauss_patch.flatten() - clean_patch.flatten())
+                #     if key in cam_dict.keys():
+                #         cam_dict[key].append(kldiv_fwd)
+                #     else:
+                #         cam_dict[key] = [kldiv_fwd]
+                #     if key in gauss_dict.keys():
+                #         gauss_dict[key].append(kldiv_fwd1)
+                #     else:
+                #         gauss_dict[key] = [kldiv_fwd1]
                 _, _, kldiv_fwd2 = kl_div_3_data(noisy_patch.flatten() - clean_patch.flatten(),
                                              read_noise_patch.flatten() - clean_patch.flatten())
 
@@ -103,11 +158,11 @@ def rate_lamdas(raw,noisy,camera,bayer_2by2, wb, cst2,sc_id,cam_dict,iso,gauss_d
                     read_dict[key].append(kldiv_fwd2)
 
                 else:  read_dict[key] = [kldiv_fwd2]
-            gauss_flag =True
+            # gauss_flag =True
 
 
 
-    return cam_dict,gauss_dict,read_dict
+    return read_dict
 
 def process_raw_for_save(patch,u,v,patch_size,bayer_2by2, wb, cst2,samples_dir,sc_id, p, iso,name,save = True):
     patch_p = patch[0, v:v + patch_size, u:u + patch_size, :]
@@ -117,7 +172,7 @@ def process_raw_for_save(patch,u,v,patch_size,bayer_2by2, wb, cst2,samples_dir,s
 
     # print(save_fn)
     if save : cv2.imwrite(save_fn, patch_srgb)
-    return patch_p,save_fn
+    return patch_p#,save_fn
 
 def set_paths___del(hps):
     if hps.server == 'skynet':

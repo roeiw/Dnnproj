@@ -29,7 +29,7 @@ from tqdm import tqdm
 
 
 
-N_mat_path = '../Nam/mat/'
+N_mat_path = '../../../data/Nam/'
 # gt_mat_path = '../test_set/mat/ValidationGtBlocksSrgb.mat'
 
 totensor = transforms.ToTensor()
@@ -63,7 +63,7 @@ totensor = transforms.ToTensor()
 
 
 model = ridnet.RIDNET(args)
-model_path = '../models/25621_l1.pt'
+model_path = '../models/LabL1_syn_11522_fullset_and_halfset_final.pt'
 
 model.load_state_dict(torch.load(model_path))
 model.eval()
@@ -82,27 +82,30 @@ total_psnr =0
 
 
 # cv2.imshow("pred_img", pred_img)
+i=0
 num_mats = 0
 for path,subdirs,mats in os.walk(N_mat_path):
-
-    # print(mats)
+    i += 1
     for mat in tqdm(mats):
+        i += 1
         temp_m = loadmat(os.path.join(path,mat))
         # print(temp_m.keys())
         noisy_mat = temp_m['img_noisy']
         gt_mat = temp_m['img_mean']
         H,W,_ = noisy_mat.shape
         # print(type(noisy_mat))
-        for i in range(0,H,int(H/8)):
-            for j in range(0,W,int(W/8)):
-                num_mats += 1
-                cropped_gt = gt_mat[i:i+int(H/8),j:j+int(W/8),:]
-                cropped_noisy = noisy_mat[i:i+int(H/8),j:j+int(W/8),:]
-                # psnr,ssim = model_result.test_image(cropped_gt,cropped_noisy,model_path,totensor,show=False)
-
-                psnr,ssim = model_result.test_noisy_image(cropped_gt,cropped_noisy)
-                total_ssim += ssim
-                total_psnr += psnr
+        cv2.imwrite("../nam_images/noisy" + str(i) + ".png", cv2.cvtColor(noisy_mat, cv2.COLOR_BGR2RGB))
+        cv2.imwrite("../nam_images/gt"+str(i)+".png",cv2.cvtColor(gt_mat, cv2.COLOR_BGR2RGB))
+        # for i in range(0,H,int(H/8)):
+        #     for j in range(0,W,int(W/8)):
+        #         num_mats += 1
+        #         cropped_gt = gt_mat[i:i+int(H/8),j:j+int(W/8),:]
+        #         cropped_noisy = noisy_mat[i:i+int(H/8),j:j+int(W/8),:]
+        #         # psnr,ssim = model_result.test_image(cropped_gt,cropped_noisy,model_path,totensor,show=False)
+        #
+        #         psnr,ssim = model_result.test_noisy_image(cropped_gt,cropped_noisy)
+        #         total_ssim += ssim
+        #         total_psnr += psnr
 print("psnr is: " + str(total_psnr / num_mats))
 print("ssim is: " + str(total_ssim / num_mats))
 

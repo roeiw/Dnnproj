@@ -112,7 +112,7 @@ def load_raw_image(im_file):
     with h5py.File(im_file, 'r') as f:  # (use this for .mat files with -v7.3 format)
         # raw = f[list(f.keys())[0]]  # use the first and only key
         raw1 = np.array(f.get('x')[:])
-        print(type(raw1))
+        # print(type(raw1))
     return raw1
 
 def gen_patches_thread(file_name, out_que):

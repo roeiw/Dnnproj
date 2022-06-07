@@ -34,7 +34,8 @@ class SIDD(Dataset):
         if torch.is_tensor(idx):
             idx = idx.tolist()
         GT_img_name = str(self.landmarks_frame.iloc[idx, 0])
-        GT_img_name = GT_img_name+'.PNG'
+        if (not "png" in GT_img_name):
+            GT_img_name = GT_img_name+'.PNG'
         noisy_image_name = GT_img_name.replace("GT", "NOISY")
 
         GT_image = io.imread(GT_img_name)
@@ -44,6 +45,8 @@ class SIDD(Dataset):
             GT_image = self.transform(GT_image)
             torch.set_rng_state(state)
             NOISY_image = self.transform(NOISY_image)
+        # print(type(GT_image))
+        # print(GT_image.shape)
         sample = {'GT_image': GT_image, 'NOISY_image': NOISY_image, 'image_name':GT_img_name}
 
         return sample

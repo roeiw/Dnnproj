@@ -6,7 +6,7 @@
       <sourceFolder url="file://$MODULE_DIR$/code/noise_model" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/venv" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.8 (Dnnproj)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.10 (Dnnproj)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="TestRunnerService">

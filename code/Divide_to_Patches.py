@@ -5,13 +5,13 @@ import torch
 import torchvision
 import csv
 
-small_patch_size = 128
+small_patch_size = 80
 
 print(os.getcwd())
 
-path_to_data = '../../../Data/SIDD_medium/SSID_medium/SIDD_Medium_Srgb/Data/'
+path_to_data = '../../../data/srgb/SIDD_Medium_Srgb/Data/'
 
-path_to_patches = '../patches_128/'
+path_to_patches = '../patches/'
 csv_path = path_to_patches + "image_csv.csv"
 
 with open(csv_path, "w") as csv_in:

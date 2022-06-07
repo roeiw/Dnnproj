@@ -32,14 +32,14 @@ def read_metadata(metadata_file_path):
 def add_noise_to_raw(raw,lambda_read,lambda_shot):
     # print(type(raw))
     # print(type(raw))
-    noise_im = np.random.normal(size=raw.shape,scale=lambda_shot)
+    shot_noise_im = np.random.normal(size=raw.shape,scale=lambda_shot)
     read_noise_im = np.random.normal(size=raw.shape,scale=lambda_read)
 
     sqrt_raw = np.sqrt(raw)
-    noisy_raw = (sqrt_raw + noise_im)*sqrt_raw
-    # gauss_raw = raw + noise_im
-    read_noise = noisy_raw + read_noise_im
-    return read_noise
+    shot_noisy_raw = (sqrt_raw + shot_noise_im)*sqrt_raw
+    gauss_raw = raw + shot_noise_im
+    read_noise = shot_noisy_raw + read_noise_im
+    return read_noise,gauss_raw,shot_noisy_raw
 
 def get_iso(metadata):
     try:
