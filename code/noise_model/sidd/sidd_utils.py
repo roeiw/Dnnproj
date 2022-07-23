@@ -10,6 +10,7 @@
 # - preparing specific portions of training, testing, and metadata filenames
 """
 import copy
+import csv
 import glob
 import logging
 import multiprocessing
@@ -47,10 +48,32 @@ nf_model_path = 'models/NoiseFlow'
 samples_dir = os.path.join(data_dir, 'examples/')
 
 
-def generate_noisy_examples(raw,noisy,camera,bayer_2by2, wb, cst2,sc_id,iso):
+
+def get_best_lambdas(csv_path):
+    best_lambdas_dict={}
+    with open(csv_path,"r") as csv_file:
+        reader = csv.reader(csv_file)
+        next(reader)
+        for row in reader:
+
+            if float(row[4]) > 0.015: continue
+            key = str(row[2])+"_"+str(row[3])+"_"+str(row[0])+"_"+str(row[1])
+            # if key in best_lambdas_dict.keys():
+            # if best_lambdas_dict[key][0] > row[4] :
+            best_lambdas_dict[key]=[row[4],row[0],row[1]]
+
+            # else:
+            #     best_lambdas_dict[key] = [row[4], row[0], row[1]]
+    return best_lambdas_dict
+
+
+
+
+
+def generate_noisy_examples(raw,noisy,camera,bayer_2by2, wb, cst2,sc_id,iso,samples_path):
     lambda_shots = numpy.linspace(10 ** (-1), 10 ** (-3), 5)
     lambda_reads = numpy.linspace(10 ** (-2), 10 ** (-5), 3)
-    patch_size = 80
+    patch_size = 300
     for lambda1 in lambda_shots:
         for lambda_read in lambda_reads:
             read_noise,gauss_noise,shot_noise= add_noise_to_raw(raw,lambda_read,lambda1)
@@ -68,15 +91,15 @@ def generate_noisy_examples(raw,noisy,camera,bayer_2by2, wb, cst2,sc_id,iso):
                 v = np.random.randint(0, clean.shape[1] - patch_size)
                 u = np.random.randint(0, clean.shape[2] - patch_size)
 
-                clean_patch = process_raw_for_save(clean, u, v, patch_size, bayer_2by2, wb, cst2, samples_dir, sc_id, p,
+                clean_patch , _ = process_raw_for_save(clean, u, v, patch_size, bayer_2by2, wb, cst2, samples_path, sc_id, p,
                                                    iso, "clean",save=False)
-                noisy_patch = process_raw_for_save(noisy, u, v, patch_size, bayer_2by2, wb, cst2, samples_dir, sc_id, p,
+                noisy_patch, _= process_raw_for_save(noisy, u, v, patch_size, bayer_2by2, wb, cst2, samples_path, sc_id, p,
                                                    iso, "noisy",save=False)
-                gauss_patch = process_raw_for_save(gauss, u, v, patch_size, bayer_2by2, wb, cst2,
-                                                                       samples_dir, sc_id, p, iso, "gauss",save=False)
-                syn_noise_patch = process_raw_for_save(syn_noisy, u, v, patch_size, bayer_2by2, wb, cst2,
-                                                           samples_dir, sc_id, p, iso, "syn_noisy", save=False)
-                read_noise_patch = process_raw_for_save(read, u, v, patch_size, bayer_2by2, wb, cst2, samples_dir, sc_id, p,
+                gauss_patch, _= process_raw_for_save(gauss, u, v, patch_size, bayer_2by2, wb, cst2,
+                                                                       samples_path, sc_id, p, iso, "gauss",save=False)
+                syn_noise_patch, _= process_raw_for_save(syn_noisy, u, v, patch_size, bayer_2by2, wb, cst2,
+                                                           samples_path, sc_id, p, iso, "syn_noisy", save=False)
+                read_noise_patch, _ = process_raw_for_save(read, u, v, patch_size, bayer_2by2, wb, cst2, samples_path, sc_id, p,
                                                         iso, "read_noise",save=False)
 
                 _, _, kldiv_shot = kl_div_3_data(noisy_patch.flatten() - clean_patch.flatten(),
@@ -85,14 +108,15 @@ def generate_noisy_examples(raw,noisy,camera,bayer_2by2, wb, cst2,sc_id,iso):
                                                  gauss_patch.flatten() - clean_patch.flatten())
                 _, _, kldiv_read = kl_div_3_data(noisy_patch.flatten() - clean_patch.flatten(),
                                              read_noise_patch.flatten() - clean_patch.flatten())
-
-                save_shot = os.path.join(samples_dir, key +'_klshot_'+ str(kldiv_shot).split('.')[1]+'_%02d_%02d_%04d.png' % (sc_id, p, iso))
-                save_read = os.path.join(samples_dir, key +'_klread_'+ str(kldiv_read).split('.')[1]+'_%02d_%02d_%04d.png' % (sc_id, p, iso))
-                save_gauss = os.path.join(samples_dir, key +'_klgauss_'+ str(kldiv_gauss).split('.')[1]+'_%02d_%02d_%04d.png' % (sc_id, p, iso))
-                save_gt = os.path.join(samples_dir, key +'_gt_%02d_%02d_%04d.png' % (sc_id, p, iso))
-                save_noisy = os.path.join(samples_dir, key +'_noisy_%02d_%02d_%04d.png' % (sc_id, p, iso))
-
-                cv2.imwrite(save_shot, syn_noise_patch)
+                key = key.replace(".","p")
+                save_shot = os.path.join(samples_path, key +'_klshot_'+ str(kldiv_shot).split('.')[1]+'_%02d_%02d_%04d.png' % (sc_id, p, iso))
+                save_read = os.path.join(samples_path, key +'_klread_'+ str(kldiv_read).split('.')[1]+'_%02d_%02d_%04d.png' % (sc_id, p, iso))
+                save_gauss = os.path.join(samples_path, key +'_klgauss_'+ str(kldiv_gauss).split('.')[1]+'_%02d_%02d_%04d.png' % (sc_id, p, iso))
+                save_gt = os.path.join(samples_path, key +'_gt_%02d_%02d_%04d.png' % (sc_id, p, iso))
+                save_noisy = os.path.join(samples_path, key +'_noisy_%02d_%02d_%04d.png' % (sc_id, p, iso))
+                print(save_shot)
+                ret = cv2.imwrite(save_shot, syn_noise_patch)
+                print(ret)
                 cv2.imwrite(save_read, read_noise_patch)
                 cv2.imwrite(save_gauss, gauss_patch)
                 cv2.imwrite(save_gt, clean_patch)
@@ -124,9 +148,9 @@ def rate_lamdas(raw,noisy,camera,bayer_2by2, wb, cst2,sc_id,cam_dict,iso,gauss_d
                 v = np.random.randint(0, clean.shape[1] - patch_size)
                 u = np.random.randint(0, clean.shape[2] - patch_size)
 
-                clean_patch = process_raw_for_save(clean, u, v, patch_size, bayer_2by2, wb, cst2, samples_dir, sc_id, p,
+                clean_patch,_ = process_raw_for_save(clean, u, v, patch_size, bayer_2by2, wb, cst2, samples_dir, sc_id, p,
                                                    iso, "clean",save=False)
-                noisy_patch = process_raw_for_save(noisy, u, v, patch_size, bayer_2by2, wb, cst2, samples_dir, sc_id, p,
+                noisy_patch,_ = process_raw_for_save(noisy, u, v, patch_size, bayer_2by2, wb, cst2, samples_dir, sc_id, p,
                                                    iso, "noisy",save=False)
 
                 # if not gauss_flag :
@@ -134,7 +158,7 @@ def rate_lamdas(raw,noisy,camera,bayer_2by2, wb, cst2,sc_id,cam_dict,iso,gauss_d
                 #                                                        samples_dir, sc_id, p, iso, "gauss",save=save_flag)
                 #     syn_noise_patch = process_raw_for_save(syn_noisy, u, v, patch_size, bayer_2by2, wb, cst2,
                 #                                            samples_dir, sc_id, p, iso, "syn_noisy", save=save_flag)
-                read_noise_patch = process_raw_for_save(read, u, v, patch_size, bayer_2by2, wb, cst2, samples_dir, sc_id, p,
+                read_noise_patch,_ = process_raw_for_save(read, u, v, patch_size, bayer_2by2, wb, cst2, samples_dir, sc_id, p,
                                                         iso, "read_noise",save=False)
 
                 save_flag = False
@@ -167,12 +191,13 @@ def rate_lamdas(raw,noisy,camera,bayer_2by2, wb, cst2,sc_id,cam_dict,iso,gauss_d
 def process_raw_for_save(patch,u,v,patch_size,bayer_2by2, wb, cst2,samples_dir,sc_id, p, iso,name,save = True):
     patch_p = patch[0, v:v + patch_size, u:u + patch_size, :]
     patch_p = unpack_raw(np.squeeze(patch_p)[1:-1, 1:-1, :])
+
     patch_srgb = process_sidd_image(patch_p, bayer_2by2, wb, cst2)
     save_fn = os.path.join(samples_dir, name+'_%02d_%02d_%04d.png' % (sc_id, p, iso))
 
     # print(save_fn)
     if save : cv2.imwrite(save_fn, patch_srgb)
-    return patch_p#,save_fn
+    return patch_srgb,save_fn
 
 def set_paths___del(hps):
     if hps.server == 'skynet':

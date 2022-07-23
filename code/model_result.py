@@ -42,6 +42,48 @@ import logging
 #noisy_image=trans1(noisy_image)
 # torch.set_rng_state(state)
 # gt_image = transform(gt_image)
+def comapre_loaded_im(gt_image, noisy_image,image_path,models,models_names,image_name,transform,just_noisy = False):
+    noisy_image_write = transform(noisy_image).permute(1, 2, 0).numpy()
+    # print(noisy_image_write)
+
+
+    noisy_transformed_image = transform(noisy_image).permute(1, 2, 0).numpy()
+    logging.basicConfig(filename="./../logs/" + image_name + ".log", level=logging.INFO)
+    if just_noisy == False:
+
+        gt_image = transform(gt_image).permute(1, 2, 0).numpy()
+        psnr = str(PSNR(gt_image, noisy_transformed_image))
+        ssim = str(calc_ssim(gt_image, noisy_transformed_image))
+        print(cv2.imwrite(image_path + 'small_gt' + image_name +'.png', gt_image * 255))
+        print(cv2.imwrite(image_path + '/' + image_name + "_psnr_is:_"+psnr.replace(".","p") +"_ssim_is:_"+ssim.replace(".","p")+'small_noisy.png', rgb2bgr(noisy_image_write * 255)))
+        logging.info("psnr for noisy image is " + psnr + " ssim is: " + ssim)
+        print(PSNR(gt_image, noisy_transformed_image))
+        print(calc_ssim(gt_image, noisy_transformed_image))
+    else :
+        gt_image = noisy_transformed_image
+    # print("Noisy Image PSNR is: " + str(PSNR(cv2.cvtColor(noisy_transformed_image,cv2.COLOR_BGR2RGB), gt_image)) + " SSIM is: " + str(calc_ssim(cv2.cvtColor(noisy_transformed_image,cv2.COLOR_BGR2RGB),gt_image)))
+    for i, load_model in enumerate(models):
+        model =load_model_for_eval(load_model)
+
+        pred_image1 = pass_though_net(model, transform(noisy_image).unsqueeze(0))
+        # pred_image2 = pass_though_net(model2,noisy_transformed_image)
+
+        # im = Im/(image_path+models_names[i]+'.png')
+        psnr = str(PSNR(pred_image1, gt_image))
+        ssim = str(calc_ssim(pred_image1, gt_image))
+        cv2.imwrite(image_path + image_name + models_names[i] +"_psnr_is:_"+psnr.replace(".","p") +"_ssim_is:_"+ssim.replace(".","p")+'.png',
+                    pred_image1*255)
+
+        print("psnr for " + models_names[i] + " image is " + psnr + " ssim is:" + ssim)
+        logging.info(
+            "psnr for " + models_names[i] + " image is " + psnr + " ssim is: " + ssim)
+
+    # cv2.imwrite(image_path+'Contentloss_model.png',pred_image2*255)
+
+    # print("psnr for content loss image is" + str(PSNR(pred_image2,gt_image))+ "ssim is:" + str(calc_ssim(pred_image2,gt_image)))
+    # cv2.imwrite(image_path+'gt.png',(gt_image*255))
+    # print("PSNR is: "+PSNR(gt_image,pred_image))
+
 
 def compare_save_images(gt_image, noisy_image,image_path,models,models_names,image_name,transform):
 
@@ -360,6 +402,25 @@ def get_image_from_mat_db(mat_path):
     # im1 = nam_mat['img_cov'].astype('uint8')
     # im2 = nam_mat['img_mean'].astype('uint8')
 
+def loaded_img_compare_wrp():
+    transform = transforms.Compose([
+                transforms.ToTensor()
+            ])
+    base_path = "../../../data/final_present/"
+    gt = cv2.imread(base_path+"dog/noisy.png")
+    noisy = cv2.imread(base_path+"dog/noisy.png")
+    models = ['../models/LabL1_syn_11522_fullset_and_halfset.pt','../models/LabL1_syn_07522.pt','../models/LabLoss_13921_l1.pt','../models/LabL1_halfrefined_24622.pt','../models/LabL1_syn_10622_thirds.pt','../models/LabL1_syn_15622_fullsynt.pt']
+    models_names = ["LabL1_syn_11522_fullset_and_halfset","LabL1_syn_07522","LabLoss_13921_l1","LabL1_halfrefined_24622","LabL1_syn_10622_thirds","LabL1_syn_15622_fullsynt"]
+    comapre_loaded_im(gt,noisy,base_path+"results/dog/",models,models_names,"dog",transform,just_noisy=True)
+
+def load_model_for_eval(path):
+    model = ridnet.RIDNET(args)
+    model.load_state_dict(torch.load(path))
+    model.eval()
+    return model
+
+
+
 def main():
 #     # get_image_from_mat_db('../Nam/mat/Canon_EOS_5D_Mark3/ISO_3200/C_2.mat')
 #     # return 0
@@ -445,13 +506,13 @@ def main():
     # model6.load_state_dict(torch.load(model6_path))
     # model6.eval()
     #
-    # model7 = ridnet.RIDNET(args)
-    # model7_path = '../models/ContentLoss_Lab_27921_l2.pt'
-    # model7.load_state_dict(torch.load(model7_path))
-    # model7.eval()
+    model7 = ridnet.RIDNET(args)
+    model7_path = '../models/LabL1_syn_10622_thirds_final.pt'
+    model7.load_state_dict(torch.load(model7_path))
+    model7.eval()
     #
     model8 = ridnet.RIDNET(args)
-    model8_path = '../models/LabL1_syn_11522_fullset_and_halfset.pt'
+    model8_path = '../models/LabL1_syn_15622_fullsynt.pt'
     model8.load_state_dict(torch.load(model8_path))
     model8.eval()
 
@@ -469,8 +530,8 @@ def main():
     # models_names = ["L1_128","L1Lab_128","L1","LabL2","LabL1","L2","ContentLossLab","Y_L1","msssim"]
 
 
-    models = [model8,model9,model10]
-    models_names = ["Lab_syn_fullset","LabL1","Lab_syn"]
+    models = [model7,model8,model9,model10]
+    models_names = ["LabL1_syn_10622_thirds_final","LabL1_syn_15622_fullsynt","LabL1","Lab_syn"]
 
     # m1_model = ridnet.RIDNET(args)
     # m1_model_path = '../models/LabL1_128p_191021_final.pt'
@@ -508,23 +569,23 @@ def main():
     # compare_save_images(gt_im,noisy_im,"../big_images/chess/",models,models_names,"chess_im_161221",transform1)
 
     ''
-    # gt_im, noisy_im = load_im("../../../data/presnt_im/" + "39/", transform,True)
-    # compare_save_images(gt_im,noisy_im,"../../../data/presnt_im/11522/",models,models_names,"39",transform)
-    #
-    # gt_im, noisy_im = load_im("../../../data/presnt_im/" + "111/", transform,True)
-    # compare_save_images(gt_im,noisy_im,"../../../data/presnt_im/11522/" ,models,models_names,"111",transform)
-    #
-    # gt_im, noisy_im = load_im("../../../data/presnt_im/" + "150/", transform,True)
-    # compare_save_images(gt_im, noisy_im, "../../../data/presnt_im/11522/", models, models_names, "150", transform)
+    gt_im, noisy_im = load_im("../../../data/presnt_im/" + "39/", transform,True)
+    compare_save_images(gt_im,noisy_im,"../../../data/presnt_im/19622/",models,models_names,"39",transform)
+
+    gt_im, noisy_im = load_im("../../../data/presnt_im/" + "111/", transform,True)
+    compare_save_images(gt_im,noisy_im,"../../../data/presnt_im/19622/" ,models,models_names,"111",transform)
+
+    gt_im, noisy_im = load_im("../../../data/presnt_im/" + "150/", transform,True)
+    compare_save_images(gt_im, noisy_im, "../../../data/presnt_im/19622/", models, models_names, "150", transform)
 
     gt_im, noisy_im = load_nam_im("../nam_images/",str(4) , transform,True)
-    compare_save_images(gt_im,noisy_im,"../nam_images/results/",models,models_names,"4",transform)
+    compare_save_images(gt_im,noisy_im,"../nam_images/results/19622/",models,models_names,"4",transform)
 
     gt_im, noisy_im = load_nam_im("../nam_images/",str(11), transform,True)
-    compare_save_images(gt_im,noisy_im,"../nam_images/results/" ,models,models_names,"11",transform)
+    compare_save_images(gt_im,noisy_im,"../nam_images/results/19622/" ,models,models_names,"11",transform)
 
     gt_im, noisy_im = load_nam_im("../nam_images/",str(24), transform,True)
-    compare_save_images(gt_im, noisy_im, "../nam_images/results/", models, models_names, "24", transform)
+    compare_save_images(gt_im, noisy_im, "../nam_images/results/19622/", models, models_names, "24", transform)
 
     # gt_im, noisy_im = load_im("../test_im/" + "60/", transform,False)
     # compare_save_images(gt_im, noisy_im, '../test_im/60/', models, models_names, "60", transform)
@@ -556,7 +617,7 @@ def main():
     return 0
 
 if __name__ == '__main__':
-    main()
+    alt_main()
 
 # sig_image = trans1(sig_image)
 # print("before net")

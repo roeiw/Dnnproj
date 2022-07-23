@@ -113,6 +113,7 @@ def load_raw_image(im_file):
         # raw = f[list(f.keys())[0]]  # use the first and only key
         raw1 = np.array(f.get('x')[:])
         # print(type(raw1))
+        print(raw1.shape)
     return raw1
 
 def gen_patches_thread(file_name, out_que):

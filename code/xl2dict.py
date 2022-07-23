@@ -3,27 +3,30 @@ import pandas as pd
 import csv
 import statistics
 
+def write_csv2(dict,csv_path):
+    with open(csv_path,"w") as csv_file:
+        writer = csv.writer(csv_file)
+        new_header = ["cam","iso","mean","shot","read"]
+        writer.writerow(new_header)
+        for key in dict.keys():
+            camiso = [key.split("_")[0],key.split("_")[1]]
+            cals = dict[key]
+            camiso = camiso + cals
+            writer.writerow(camiso)
+
 def convert_2_csv():
     read_file = pd.read_excel (r'../Book2.xlsx')
     read_file.to_csv (r'../gammas_and_shit.csv', index = None, header=True)
 
-def get_cam_iso_dict():
+def get_cam_iso_dict(csv_path):
     iso_cam_dict={}
-    with open(r'../../gammas_and_shit1.csv') as csv_file:
+    with open(csv_path,"r") as csv_file:
         reader = csv.reader(csv_file)
         header = reader.__next__()
-        print(header)
-
-
         for row in reader:
-            key = row[4] +"_"+ row[5]
-            value = [row[1],row[3],row[6]]
-            if row[0] != 'read' : continue
-            if (key in iso_cam_dict.keys()):
-                if iso_cam_dict[key][2]>row[6]:
-                    iso_cam_dict[key] = value
-
-            else:  iso_cam_dict[key] = value
+            key = str(row[0]) +"_"+ str(row[1])
+            value = [row[2],row[3],row[4]]
+            iso_cam_dict[key] = value
     return iso_cam_dict
 
 def write_csv(iso_cam_dict):

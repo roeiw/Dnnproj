@@ -37,7 +37,7 @@ transform = transforms.Compose([
 #PycharmProjects/Data/
 
 # train_dataset = SIDD_Dataset.SIDD("../patches_128/image_csv1.csv","../patches_128/", transform)
-train_dataset = SIDD_Dataset.SIDD("../patches_and_shit.csv","./Patches/", transform)
+train_dataset = SIDD_Dataset.SIDD("../patches_and_shit24622.csv","./Patches/", transform)
 # train_dataset = SIDD_Dataset.SIDD("../patches/image_csv.csv","./Patches/", transform)
 # train_dataset = SIDD_Dataset.SIDD("../syn_patch/syn_csv.csv","./Patches/", transform)
 
@@ -77,7 +77,7 @@ model = ridnet.RIDNET(args)
 # LabLoss = utility.LabLoss
 
 loss = utility.LabLoss_L1
-t = Trainer(args, validation_dataloders,train_dataloders, model, loss, utility.checkpoint(args), model_path+'LabL1_syn_11522_fullset_and_halfset.pt')
+t = Trainer(args, validation_dataloders,train_dataloders, model, loss, utility.checkpoint(args), model_path+'LabL1_halfrefined_24622.pt')
 t.train()
 
 

@@ -10642,3 +10642,81 @@ save_results: False
 testpath: ../../data
 testset: Set5
 
+2022-06-10-08:29:28
+
+debug: False
+template: .
+dir_data: ../../data
+dir_demo: ../test
+rgb_range: 255
+n_feats: 64
+reset: False
+test_every: 1000
+epochs: 3
+batch_size: 16
+test_only: False
+lr: 0.0001
+gamma: 0.5
+loss: L1
+save: test
+load: .
+resume: 0
+print_model: False
+save_models: False
+print_every: 100
+save_results: False
+testpath: ../../data
+testset: Set5
+
+2022-06-15-19:18:22
+
+debug: False
+template: .
+dir_data: ../../data
+dir_demo: ../test
+rgb_range: 255
+n_feats: 64
+reset: False
+test_every: 1000
+epochs: 3
+batch_size: 16
+test_only: False
+lr: 0.0001
+gamma: 0.5
+loss: L1
+save: test
+load: .
+resume: 0
+print_model: False
+save_models: False
+print_every: 100
+save_results: False
+testpath: ../../data
+testset: Set5
+
+2022-06-24-09:03:10
+
+debug: False
+template: .
+dir_data: ../../data
+dir_demo: ../test
+rgb_range: 255
+n_feats: 64
+reset: False
+test_every: 1000
+epochs: 3
+batch_size: 16
+test_only: False
+lr: 0.0001
+gamma: 0.5
+loss: L1
+save: test
+load: .
+resume: 0
+print_model: False
+save_models: False
+print_every: 100
+save_results: False
+testpath: ../../data
+testset: Set5
+
