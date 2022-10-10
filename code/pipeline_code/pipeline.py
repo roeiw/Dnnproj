@@ -1,8 +1,10 @@
+import cv2
 import numpy as np
 from pipeline_code.pipeline_util import get_visible_raw_image, get_metadata, normalize, white_balance, demosaic, \
     apply_color_space_transform, transform_xyz_to_srgb, apply_gamma, apply_tone_map, fix_orientation, \
     lens_shading_correction
-
+import h5py
+import rawpy
 
 def run_pipeline_v2(image_or_path, params=None, metadata=None, fix_orient=True):
     params_ = params.copy()
@@ -116,6 +118,14 @@ def run_pipeline_v2(image_or_path, params=None, metadata=None, fix_orient=True):
     raise ValueError('Invalid input/output stage: input_stage = {}, output_stage = {}'.format(params_['input_stage'],
                                                                                               params_['output_stage']))
 
+def load_raw_image(im_file):
+    """Loads and returns a normalized packed raw-RGB image from .mat file (im_file) with dimensions (1, ?, ?, 4)"""
+    with h5py.File(im_file, 'r') as f:  # (use this for .mat files with -v7.3 format)
+        # raw = f[list(f.keys())[0]]  # use the first and only key
+        raw1 = np.array(f.get('x')[:])
+        # print(type(raw1))
+        print(raw1.shape)
+    return raw1
 
 def run_pipeline(image_path, params):
     # raw image data
@@ -170,3 +180,10 @@ def run_pipeline(image_path, params):
 
     output_image = None
     return output_image
+
+
+def main():
+
+
+if __name__ == '__main__':
+    main()

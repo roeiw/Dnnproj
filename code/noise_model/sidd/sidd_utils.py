@@ -48,7 +48,7 @@ nf_model_path = 'models/NoiseFlow'
 samples_dir = os.path.join(data_dir, 'examples/')
 
 
-
+#go over dictionary and rate best lamabdaas on images.
 def get_best_lambdas(csv_path):
     best_lambdas_dict={}
     with open(csv_path,"r") as csv_file:
@@ -69,11 +69,11 @@ def get_best_lambdas(csv_path):
 
 
 
-
+#sub funtion that saves the exmaple images while looking for correct lambda for noise adding
 def generate_noisy_examples(raw,noisy,camera,bayer_2by2, wb, cst2,sc_id,iso,samples_path):
-    lambda_shots = numpy.linspace(10 ** (-1), 10 ** (-3), 5)
-    lambda_reads = numpy.linspace(10 ** (-2), 10 ** (-5), 3)
-    patch_size = 300
+    lambda_shots = numpy.linspace(10 ** (-1), 10 ** (-1.7), 3)
+    lambda_reads = numpy.linspace(10 ** (-2), 10 ** (-3), 2)
+    patch_size = 100
     for lambda1 in lambda_shots:
         for lambda_read in lambda_reads:
             read_noise,gauss_noise,shot_noise= add_noise_to_raw(raw,lambda_read,lambda1)
@@ -109,9 +109,9 @@ def generate_noisy_examples(raw,noisy,camera,bayer_2by2, wb, cst2,sc_id,iso,samp
                 _, _, kldiv_read = kl_div_3_data(noisy_patch.flatten() - clean_patch.flatten(),
                                              read_noise_patch.flatten() - clean_patch.flatten())
                 key = key.replace(".","p")
-                save_shot = os.path.join(samples_path, key +'_klshot_'+ str(kldiv_shot).split('.')[1]+'_%02d_%02d_%04d.png' % (sc_id, p, iso))
-                save_read = os.path.join(samples_path, key +'_klread_'+ str(kldiv_read).split('.')[1]+'_%02d_%02d_%04d.png' % (sc_id, p, iso))
-                save_gauss = os.path.join(samples_path, key +'_klgauss_'+ str(kldiv_gauss).split('.')[1]+'_%02d_%02d_%04d.png' % (sc_id, p, iso))
+                save_shot = os.path.join(samples_path, key +'_klshot_'+ str(kldiv_shot).replace(".","p")+'_%02d_%02d_%04d.png' % (sc_id, p, iso))
+                save_read = os.path.join(samples_path, key +'_klread_'+ str(kldiv_read).replace(".","p")+'_%02d_%02d_%04d.png' % (sc_id, p, iso))
+                save_gauss = os.path.join(samples_path, key +'_klgauss_'+ str(kldiv_gauss).replace(".","p")+'_%02d_%02d_%04d.png' % (sc_id, p, iso))
                 save_gt = os.path.join(samples_path, key +'_gt_%02d_%02d_%04d.png' % (sc_id, p, iso))
                 save_noisy = os.path.join(samples_path, key +'_noisy_%02d_%02d_%04d.png' % (sc_id, p, iso))
                 print(save_shot)
@@ -123,8 +123,7 @@ def generate_noisy_examples(raw,noisy,camera,bayer_2by2, wb, cst2,sc_id,iso,samp
                 cv2.imwrite(save_noisy, noisy_patch)
 
 
-
-
+#checking all lambda options that could be added to images
 def rate_lamdas(raw,noisy,camera,bayer_2by2, wb, cst2,sc_id,cam_dict,iso,gauss_dict,read_dict,save_num):
     lambda_shots = numpy.linspace(10**(-1),10**(-3),20)
     lambda_reads = numpy.linspace(10**(-2),10**(-5),6)
@@ -188,6 +187,7 @@ def rate_lamdas(raw,noisy,camera,bayer_2by2, wb, cst2,sc_id,cam_dict,iso,gauss_d
 
     return read_dict
 
+#load and save patch in image by a given size.
 def process_raw_for_save(patch,u,v,patch_size,bayer_2by2, wb, cst2,samples_dir,sc_id, p, iso,name,save = True):
     patch_p = patch[0, v:v + patch_size, u:u + patch_size, :]
     patch_p = unpack_raw(np.squeeze(patch_p)[1:-1, 1:-1, :])
@@ -199,6 +199,8 @@ def process_raw_for_save(patch,u,v,patch_size,bayer_2by2, wb, cst2,samples_dir,s
     if save : cv2.imwrite(save_fn, patch_srgb)
     return patch_srgb,save_fn
 
+
+#functions from noise flow project
 def set_paths___del(hps):
     if hps.server == 'skynet':
         hps.sidd_path = '/shared-data/SIDD/'

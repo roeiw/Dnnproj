@@ -101,7 +101,7 @@ def main():
     save_num = 5
     with open("../gammas_and_shit2.csv",'w') as csv_file:
         csv_writer = csv.writer(csv_file,lineterminator="\n")
-        for sc_id in tqdm(range(25,28)):  # scene IDs
+        for sc_id in tqdm([77,130,150,51]):  # scene IDs
             im_path = glob.glob(os.path.join(sidd_path, '%04d_*' % sc_id, '*GT_RAW_010.MAT'))
             if (not im_path): continue
             # print(im_path[0])
@@ -117,7 +117,7 @@ def main():
             noisy = loader.load_raw_image_packed(glob.glob(os.path.join(sidd_path, '%04d_*' % sc_id, '*NOISY_RAW_010.MAT'))[0])
 
             clean = loader.load_raw_image(glob.glob(os.path.join(sidd_path, '%04d_*' % sc_id, '*GT_RAW_010.MAT'))[0])
-            generate_noisy_examples(clean,noisy,cam,bayer_2by2,wb,cst2,sc_id,iso,"../../../../data/raw/SIDD_Medium_Raw/examples/")
+            generate_noisy_examples(clean,noisy,cam,bayer_2by2,wb,cst2,sc_id,iso,"../../../../data/raw/SIDD_Medium_Raw/real_examples_small/")
             continue
             read_dict = sidd.sidd_utils.rate_lamdas(clean,noisy,cam,bayer_2by2, wb, cst2,sc_id,camera_dict,iso,gauss_dict,read_dict,save_num)
 
@@ -193,13 +193,7 @@ def main():
         #     variance2 = variance(value)
         #     print("avarage of gauss_noise " + str(key) + " is " + str(mean2) + "_variance is: " + str(variance2))
         create_lambda_csv(read_dict)
-        # for key, value in read_dict.items():
-        #     mean3 = mean(value)
-        #     variance3 = variance(value)
-            # print("avarage of read_noise " + str(key) + " is " + str(mean3) + "_variance is: " + str(variance3))
-            # camera_dict[key].a
-        # print(camera_dict)
-        # print("Mean KL divergence = {}".format(np.mean(np.array(kldiv_list), axis=0)))
+
 
 
 def save_noise_examples_patches():
@@ -260,12 +254,14 @@ def load_cam_iso_nlf():
 
 
 if __name__ == '__main__':
-    noisy_raw_path = os.path.abspath("../../../../data/raw/SIDD_Medium_Raw/Data/0039_002_IP_00100_00180_5500_L/0039_NOISY_RAW_010.MAT")
-    noisy_srgb_path = os.path.abspath("../../../../data/srgb/SIDD_Medium_Srgb/Data/0039_002_IP_00100_00180_5500_L/0039_NOISY_SRGB_010.PNG")
-    gt_path = os.path.abspath("../../../../data/srgb/SIDD_Medium_Srgb/Data/0039_002_IP_00100_00180_5500_L/0039_GT_SRGB_010.PNG")
+    main()
 
-    meta_data = os.path.abspath("../../../../data/raw/SIDD_Medium_Raw/Data/0039_002_IP_00100_00180_5500_L/0039_METADATA_RAW_010.MAT")
-    compare_pipelines(noisy_raw_path,noisy_srgb_path,meta_data,gt_path)
+    # noisy_raw_path = os.path.abspath("../../../../data/raw/SIDD_Medium_Raw/Data/0039_002_IP_00100_00180_5500_L/0039_NOISY_RAW_010.MAT")
+    # noisy_srgb_path = os.path.abspath("../../../../data/srgb/SIDD_Medium_Srgb/Data/0039_002_IP_00100_00180_5500_L/0039_NOISY_SRGB_010.PNG")
+    # gt_path = os.path.abspath("../../../../data/srgb/SIDD_Medium_Srgb/Data/0039_002_IP_00100_00180_5500_L/0039_GT_SRGB_010.PNG")
+    #
+    # meta_data = os.path.abspath("../../../../data/raw/SIDD_Medium_Raw/Data/0039_002_IP_00100_00180_5500_L/0039_METADATA_RAW_010.MAT")
+    # compare_pipelines(noisy_raw_path,noisy_srgb_path,meta_data,gt_path)
 
     # create_synt("../full_noise_set_15622.csv")
     # dict = get_best_lambdas("../lambda_and_shit.csv")

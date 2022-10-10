@@ -1,6 +1,6 @@
 import struct
 from fractions import Fraction
-from .exif_data_formats import exif_formats
+from exif_data_formats import exif_formats
 
 
 class Ifd:
