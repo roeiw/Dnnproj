@@ -10,7 +10,7 @@ from pipeline_code.pipeline_util import get_visible_raw_image
 from process_raw import DngFile
 
 
-
+#images for trying to load raw images.
 path = "../mats/raw_mats/images/0001_001_S6_00100_00060_3200_L/0001_GT_RAW_010.MAT"
 path_meta = "../../mats/raw_mats/images/0001_001_S6_00100_00060_3200_L/0001_METADATA_RAW_010.MAT"
 

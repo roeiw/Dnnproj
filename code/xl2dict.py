@@ -3,6 +3,8 @@ import pandas as pd
 import csv
 import statistics
 
+
+#util funtions for working with CSV
 def write_csv2(dict,csv_path):
     with open(csv_path,"w") as csv_file:
         writer = csv.writer(csv_file)

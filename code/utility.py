@@ -22,6 +22,10 @@ import lpips
 from pytorch_msssim import ms_ssim
 
 
+
+#utility function for creating differnet loss function for testing
+
+
 def msssim(pred_batch,gt_batch):
     ms_ssim_loss = 1-ms_ssim(pred_batch,gt_batch,data_range=1,win_size=7)
     return ms_ssim_loss

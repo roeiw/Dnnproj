@@ -25,6 +25,9 @@ import random
 import model_result
 from tqdm import tqdm
 
+
+#extract on NAM datset
+
 N_mat_path = '../Nam/mat/'
 # total_ssim = 0
 # total_psnr = 0

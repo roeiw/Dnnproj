@@ -28,7 +28,7 @@ def read_metadata(metadata_file_path):
     cam = get_cam(meta)
     return meta, bayer_2by2, wb, cst2, iso, cam
 
-
+#function that creates noise by a given lambda and returns the noisy images.
 def add_noise_to_raw(raw,lambda_read,lambda_shot):
     # print(type(raw))
     # print(type(raw))
@@ -41,6 +41,7 @@ def add_noise_to_raw(raw,lambda_read,lambda_shot):
     read_noise = shot_noisy_raw + read_noise_im
     return read_noise,gauss_raw,shot_noisy_raw
 
+#get iso for iimages
 def get_iso(metadata):
     try:
         iso = metadata['ISOSpeedRatings'][0][0]

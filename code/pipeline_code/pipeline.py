@@ -181,9 +181,3 @@ def run_pipeline(image_path, params):
     output_image = None
     return output_image
 
-
-def main():
-
-
-if __name__ == '__main__':
-    main()

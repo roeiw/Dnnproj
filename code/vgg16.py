@@ -3,7 +3,7 @@ from collections import namedtuple
 import torch
 from torchvision import models
 
-
+#VGG16 architecture for trying VGG based loos funtion.
 class Vgg16(torch.nn.Module):
     def __init__(self, requires_grad=False):
         super(Vgg16, self).__init__()

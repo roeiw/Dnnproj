@@ -3,7 +3,7 @@ import torch.nn.functional as F
 from math import exp
 import numpy as np
 
-
+#imported funtion to work on MSSSIM based loss functions.
 def gaussian(window_size, sigma):
     gauss = torch.Tensor([exp(-(x - window_size//2)**2/float(2*sigma**2)) for x in range(window_size)])
     return gauss/gauss.sum()

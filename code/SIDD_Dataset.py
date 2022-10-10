@@ -13,6 +13,7 @@ from torchvision import transforms
 import torchvision.transforms.functional as TF
 import random
 
+#SIDD dataset class for training.
 class SIDD(Dataset):
 
     def __init__(self, csv_file, root_dir, transform=None):

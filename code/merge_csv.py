@@ -1,6 +1,6 @@
 import csv
 
-
+#merge 2 csv's
 with open("../patches_and_shit24622.csv","w") as patch_csv:
     writer = csv.writer(patch_csv)
     with open("../patches/image_csv.csv","r") as srgb_csv:

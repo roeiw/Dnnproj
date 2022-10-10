@@ -24,7 +24,7 @@ import random
 import model_result
 import os
 
-
+#running this creates a dataset from validation of SIDD
 
 
 N_mat_path = '../test_set/mat/ValidationNoisyBlocksSrgb.mat'
@@ -50,5 +50,3 @@ for i in range(num_img):
         # cv2.imwrite("../test_images/Noisy_test_im"+str(i)+"_"+str(j)+".png",n_mat['ValidationNoisyBlocksSrgb'][i][j])
         # cv2.imwrite("../test_images/GT_test_im"+str(i)+"_"+str(j)+".png",gt_mat['ValidationGtBlocksSrgb'][i][j])
 
-print(gt_mat['ValidationGtBlocksSrgb'][0][0].shape)
-print("Done")
